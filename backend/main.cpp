@@ -1,28 +1,29 @@
-#include "httplib.h"
+#include "cpp-httplib.h"
 #include "json.hpp"
 
-using json = nlohmann::json;
-using namespace httplib;
-
 int main() {
-  Server svr;
+    httplib::Server server;
 
-  // Define the /api/analyze endpoint
-  svr.Get("/api/analyze", [](const Request& req, Response& res) {
-    // Grab the ?symbol=XYZ query parameter
-    std::string symbol = req.has_param("symbol") ? req.get_param_value("symbol") : "???";
-    // Here you’d run your own stock analysis logic
-    json result = {
-      {"symbol", symbol},
-      {"signal", "hold"},     // Hardcoded for now, expand logic as needed
-      {"rsi", 53.5},
-      {"macd", 0.24},
-      {"bollinger", "neutral"}
-    };
-    res.set_header("Access-Control-Allow-Origin", "*"); // Allow frontend calls
-    res.set_content(result.dump(), "application/json");
-  });
+    server.Get("/api/health", [](const httplib::Request& request, httplib::Response& response) {
+        response.set_content("{ \"status\" : \"ok\" }", "application/json");
+    });
 
-  printf("Listening on http://localhost:8080 ...\n");
-  svr.listen("0.0.0.0", 8080);
+    server.Get("/api/stocks", [](const httplib::Request& request ,httplib::Response& response) {
+        if (request.has_param("symbol")) {
+            std::string symbol = request.get_param_value("symbol");
+
+            nlohmann::json j;
+            j["symbol"] = symbol;
+            j["time"] = "10:00am";
+            j["open"] = 100.00;
+            j["high"] = 103.18;
+            j["low"] = 99.81;
+            j["close"] = 103.05;
+            j["volume"] = 10000;
+
+            response.set_content(j.dump(), "application/json");
+        }
+    });
+
+    server.listen("localhost", 1234);
 }
