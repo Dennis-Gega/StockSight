@@ -8,6 +8,8 @@ int main() {
         response.set_content("{ \"status\" : \"ok\" }", "application/json");
     });
 
+    // testing testing 
+
     server.Get("/api/stocks", [](const httplib::Request& request ,httplib::Response& response) {
         if (request.has_param("symbol")) {
             std::string symbol = request.get_param_value("symbol");
