@@ -3,10 +3,10 @@
 #include <cstdint>
 
 struct PriceBar {
-  std::string ts;     // ISO timestamp
-  double open{};
-  double high{};
-  double low{};
-  double close{};
-  long long volume{};
+    std::string ts;      
+    double open{};       
+    double high{};       
+    double low{};        
+    double close{};      
+    long long volume{};  
 };

@@ -4,32 +4,47 @@ project(stocksight-backend)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# -------------------------------
-# Include directories (your .hpp)
-# -------------------------------
+# ------------------------------------
+# Include headers
+# ------------------------------------
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# -------------------------------
+# ------------------------------------
+# Locate libpqxx / libpq (Postgres client)
+# ------------------------------------
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBPQXX REQUIRED libpqxx)
+
+include_directories(${LIBPQXX_INCLUDE_DIRS})
+link_directories(${LIBPQXX_LIBRARY_DIRS})
+
+# ------------------------------------
 # Backend source files
-# -------------------------------
+# ------------------------------------
 set(SOURCES
     main.cpp
     src/db.cpp
-    src/indicators.cpp
     src/util.cpp
+    src/indicators.cpp
 )
 
-# -------------------------------
+# ------------------------------------
 # Build backend executable
-# -------------------------------
+# ------------------------------------
 add_executable(stocksight-backend ${SOURCES})
 
-# ------------------------------------------------
-# GoogleTest (same as your original)
-# ------------------------------------------------
+target_link_libraries(
+    stocksight-backend
+    ${LIBPQXX_LIBRARIES}
+    pq
+)
+
+# ------------------------------------
+# GoogleTest config
+# ------------------------------------
 include(FetchContent)
 FetchContent_Declare(
     googletest
@@ -39,19 +54,19 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-# Test executable
 add_executable(
     test_main
     test_main.cpp
     src/db.cpp
-    src/indicators.cpp
     src/util.cpp
+    src/indicators.cpp
 )
 
-# Link test executable with GoogleTest
 target_link_libraries(
     test_main
     GTest::gtest_main
+    ${LIBPQXX_LIBRARIES}
+    pq
 )
 
 include(GoogleTest)
