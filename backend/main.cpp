@@ -13,86 +13,45 @@
 using json = nlohmann::json;
 
 int main() {
-    //
-    // 1) Load DB connection string
-    //
-    std::string db_uri = env_or(
-        "DATABASE_URL",
-        "postgres://postgres:postgres@localhost:5432/stocksight"
-    );
-
+    // Load DB connection string
+    std::string db_uri = env_or("TIMESCALE_SERVICE_URL",
+    "postgresql://postgres:postgres@localhost:5432/stocksight");
     DB db(db_uri);
 
     httplib::Server server;
 
     //
-    // ───────────────────────────────────────
-    //  /api/health
-    // ───────────────────────────────────────
+    // Health check
     //
     server.Get("/api/health", [&](const httplib::Request&, httplib::Response& res){
-        res.set_content(R"({"status":"ok"})", "application/json");
+        res.set_content("{\"status\":\"ok\"}", "application/json");
     });
 
     //
-    // ───────────────────────────────────────
-    //  /api/stocks?symbol=AAPL
-    //  Simple endpoint used by your frontend
-    // ───────────────────────────────────────
-    //
-    server.Get("/api/stocks", [&](const httplib::Request& req, httplib::Response& res){
-        if (!req.has_param("symbol")) {
-            res.status = 400;
-            res.set_content("{\"error\": \"missing symbol param\"}", "application/json");
-            return;
-        }
-
-        std::string symbol = req.get_param_value("symbol");
-
-        // Fetch latest 100 rows for now
-        auto rows = db.fetch_prices(symbol, "1d", "", "", 100);
-
-        json out;
-        out["symbol"] = symbol;
-        out["data"] = json::array();
-
-        for (auto &r : rows) {
-            out["data"].push_back({
-                {"time",   r.ts},
-                {"open",   r.open},
-                {"high",   r.high},
-                {"low",    r.low},
-                {"close",  r.close},
-                {"volume", r.volume}
-            });
-        }
-
-        res.set_content(out.dump(), "application/json");
-    });
-
-    //
-    // ───────────────────────────────────────
-    //  /api/prices
-    //  Full OHLCV endpoint
-    // ───────────────────────────────────────
+    // /api/prices (fixed version)
     //
     server.Get("/api/prices", [&](const httplib::Request& req, httplib::Response& res){
-        auto q = parse_query(req.query);
 
-        std::string ticker   = q.count("ticker")? q["ticker"] : "AAPL";
-        std::string interval = q.count("interval")? q["interval"] : "1d";
-        std::string start    = q.count("start")? q["start"] : "";
-        std::string end      = q.count("end")? q["end"] : "";
-        int limit            = q.count("limit")? std::stoi(q["limit"]) : 300;
+    try {
+
+        std::string ticker   = req.has_param("ticker") ? req.get_param_value("ticker") : "AAPL";
+        std::string interval = req.has_param("interval") ? req.get_param_value("interval") : "1d";
+        std::string start    = req.has_param("start") ? req.get_param_value("start") : "";
+        std::string end      = req.has_param("end") ? req.get_param_value("end") : "";
+        int limit            = req.has_param("limit") ? std::stoi(req.get_param_value("limit")) : 300;
+
+        std::cout << "Prices endpoint hit. ticker=" << ticker << std::endl;
+        std::cout << "DB URI = " << db_uri << std::endl;
 
         auto rows = db.fetch_prices(ticker, interval, start, end, limit);
+        std::cout << "[DB] Rows fetched = " << rows.size() << std::endl;
 
         json out;
         out["ticker"] = ticker;
         out["interval"] = interval;
         out["prices"] = json::array();
 
-        for (auto& r : rows){
+        for (auto& r : rows) {
             out["prices"].push_back({
                 {"t", r.ts},
                 {"o", r.open},
@@ -104,20 +63,22 @@ int main() {
         }
 
         res.set_content(out.dump(), "application/json");
-    });
+    }
+    catch (const std::exception& e) {
+        std::cerr << "[ERROR] Exception in /api/prices: " << e.what() << std::endl;
+        res.status = 500;
+        res.set_content(std::string("{\"error\":\"") + e.what() + "\"}", "application/json");
+    }
+});
+
 
     //
-    // ───────────────────────────────────────
-    //  /api/indicators
-    //  Returns RSI, MACD, Bollinger
-    // ───────────────────────────────────────
+    // /api/indicators (fixed version)
     //
     server.Get("/api/indicators", [&](const httplib::Request& req, httplib::Response& res){
-        auto q = parse_query(req.query);
-
-        std::string ticker   = q.count("ticker")? q["ticker"] : "AAPL";
-        std::string interval = q.count("interval")? q["interval"] : "1d";
-        int limit            = q.count("limit")? std::stoi(q["limit"]) : 200;
+        std::string ticker   = req.has_param("ticker")   ? req.get_param_value("ticker")   : "AAPL";
+        std::string interval = req.has_param("interval") ? req.get_param_value("interval") : "1d";
+        int limit            = req.has_param("limit")    ? std::stoi(req.get_param_value("limit")) : 200;
 
         auto rows = db.fetch_prices(ticker, interval, "", "", limit);
 
@@ -130,20 +91,21 @@ int main() {
             prices.push_back({{"t", r.ts}, {"c", r.close}});
         }
 
-        // compute indicators
         auto rsiV = rsi(close, 14);
-        auto m    = macd(close, 12, 26, 9);
-        auto bb   = bollinger(close, 20, 2.0);
+        auto m = macd(close, 12, 26, 9);
+        auto bb = bollinger(close, 20, 2.0);
 
         json out;
-        out["ticker"]   = ticker;
+        out["ticker"] = ticker;
         out["interval"] = interval;
-        out["prices"]   = prices;
+        out["prices"] = prices;
 
-        auto to_arr = [&](const std::vector<double>& v){
+        auto to_arr = [](const std::vector<double>& v){
             json a = json::array();
-            for (double d : v)
-                a.push_back(std::isnan(d) ? nullptr : json(d));
+            for (double d : v){
+                if (std::isnan(d)) a.push_back(nullptr);
+                else a.push_back(d);
+            }
             return a;
         };
 
@@ -155,21 +117,29 @@ int main() {
                 {"hist",   to_arr(m.hist)}
             }},
             {"bb", {
-                {"upper", to_arr(bb.upper)},
+                {"upper",  to_arr(bb.upper)},
                 {"middle", to_arr(bb.middle)},
-                {"lower", to_arr(bb.lower)}
+                {"lower",  to_arr(bb.lower)}
             }}
         };
+
+        std::string signal = "Hold";
+        if (!rsiV.empty()) {
+            double last = rsiV.back();
+            if (!std::isnan(last)) {
+                if (last < 30) signal = "Buy";
+                else if (last > 70) signal = "Sell";
+            }
+        }
+
+        out["signal"] = signal;
 
         res.set_content(out.dump(), "application/json");
     });
 
     //
-    // ───────────────────────────────────────
     // Start server
-    // ───────────────────────────────────────
     //
-    std::cout << "Backend running at http://localhost:8080\n";
+    std::cout << "Listening on http://localhost:8080\n";
     server.listen("0.0.0.0", 8080);
-    return 0;
 }
