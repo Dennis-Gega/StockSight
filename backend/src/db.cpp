@@ -14,15 +14,17 @@ std::vector<PriceBar> DB::fetch_prices(
 {
     try {
         std::cout << "[DB::fetch_prices] SQL query starting..." << std::endl;
+        std::cout << "  Ticker=" << ticker << " Limit=" << limit << std::endl;
 
         pqxx::connection c(conn_);
         pqxx::work tx(c);
 
+        // --- FINAL CORRECT QUERY ---
         std::string sql = R"SQL(
-            SELECT ticker, ts, open, high, low, close, volume
+            SELECT symbol, time, open, high, low, close, volume
             FROM price_history
-            WHERE ticker = $1
-            ORDER BY ts ASC
+            WHERE symbol = $1
+            ORDER BY time ASC
             LIMIT $2
         )SQL";
 
@@ -34,7 +36,8 @@ std::vector<PriceBar> DB::fetch_prices(
 
         for (auto const& row : r) {
             PriceBar p;
-            p.ts     = row["ts"].as<std::string>();
+            p.ticker = row["symbol"].as<std::string>();
+            p.ts     = row["time"].as<std::string>();
             p.open   = row["open"].as<double>();
             p.high   = row["high"].as<double>();
             p.low    = row["low"].as<double>();
@@ -51,4 +54,3 @@ std::vector<PriceBar> DB::fetch_prices(
         throw;  // rethrow to /api/prices
     }
 }
-
