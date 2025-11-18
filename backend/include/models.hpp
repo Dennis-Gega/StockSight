@@ -1,0 +1,12 @@
+#pragma once
+#include <string>
+#include <cstdint>
+
+struct PriceBar {
+  std::string ts;     // ISO timestamp
+  double open{};
+  double high{};
+  double low{};
+  double close{};
+  long long volume{};
+};
