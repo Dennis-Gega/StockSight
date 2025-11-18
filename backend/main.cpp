@@ -1,10 +1,10 @@
-#include "cpp-httplib.h"
-#include "json.hpp"
-#include "config.hpp"
-#include "db.hpp"
-#include "indicators.hpp"
-#include "models.hpp"
-#include "util.hpp"
+#include "./lib/cpp-httplib.h"
+#include "./lib/json.hpp"
+#include "./include/config.hpp"
+#include "./include/db.hpp"
+#include "./include/indicators.hpp"
+#include "./include/models.hpp"
+#include "./include/util.hpp"
 
 #include <vector>
 #include <algorithm>

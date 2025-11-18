@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <thread>
-#include "cpp-httplib.h"
-#include "config.hpp"
-#include "db.hpp"
-#include "indicators.hpp"
+#include "./lib/cpp-httplib.h"
+#include "./include/config.hpp"
+#include "./include/db.hpp"
+#include "./include/indicators.hpp"
 
 //
 // Basic health check
