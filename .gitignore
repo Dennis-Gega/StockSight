@@ -28,4 +28,4 @@ build/
 .cache/
 .env
 myenv/
-backend/venv/
+venv/
