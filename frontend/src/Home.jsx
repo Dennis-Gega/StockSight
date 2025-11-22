@@ -7,8 +7,8 @@ export default function Home() {
   const errorMessage = params.get("error");
 
   return (
-    <section className="py-16 sm:py-24 flex justify-center">
-      <div className="w-full max-w-4xl text-center px-4 space-y-10">
+    <section className="flex flex-col justify-center items-center min-h-screen py-16 sm:py-24">
+      <div className="home-container w-full max-w-4xl text-center px-4 space-y-10">
 
         {/* Error message (centered) */}
         {errorMessage && (

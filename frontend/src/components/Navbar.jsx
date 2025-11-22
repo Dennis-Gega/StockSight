@@ -8,7 +8,8 @@ const active =
 export default function Navbar() {
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200/70 dark:border-slate-800/70 backdrop-blur bg-white/70 dark:bg-slate-900/70">
-      <div className="container max-w-6xl flex items-center justify-between gap-4 py-3">
+      {/* center the nav and cap its width */}
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <NavLink to="/" className="flex items-center gap-2">
           <div className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-2.5 py-1 text-xs font-semibold text-white shadow-soft">
             SS
@@ -27,7 +28,9 @@ export default function Navbar() {
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `${linkBase} ${isActive ? active : "text-slate-600 dark:text-slate-200"}`
+              `${linkBase} ${
+                isActive ? active : "text-slate-600 dark:text-slate-200"
+              }`
             }
           >
             Home
@@ -35,7 +38,9 @@ export default function Navbar() {
           <NavLink
             to="/about"
             className={({ isActive }) =>
-              `${linkBase} ${isActive ? active : "text-slate-600 dark:text-slate-200"}`
+              `${linkBase} ${
+                isActive ? active : "text-slate-600 dark:text-slate-200"
+              }`
             }
           >
             About
@@ -43,7 +48,9 @@ export default function Navbar() {
           <NavLink
             to="/team"
             className={({ isActive }) =>
-              `${linkBase} ${isActive ? active : "text-slate-600 dark:text-slate-200"}`
+              `${linkBase} ${
+                isActive ? active : "text-slate-600 dark:text-slate-200"
+              }`
             }
           >
             Team

@@ -1,6 +1,15 @@
 /* Tailwind v4: single import */
 @import "tailwindcss";
 
+/* Global: prevent sideways scrolling and remove default body margin */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
 /* optional subtle dotted background */
 .bg-dots {
   background-image: radial-gradient(rgba(30,41,59,.12) 1px, transparent 1px);
