@@ -7,9 +7,10 @@ const active =
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200/70 dark:border-slate-800/70 backdrop-blur bg-white/70 dark:bg-slate-900/70">
-      {/* center the nav and cap its width */}
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+    <header className="sticky top-0 z-20 border-b border-slate-200/70 dark:border-slate-800/70 backdrop-blur bg-white/70 dark:bg-slate-900/70 w-full">
+      {/* Flex container now stretches full width */}
+      <div className="flex items-center justify-between max-w-full mx-4 py-3">
+        {/* Brand on the far left */}
         <NavLink to="/" className="flex items-center gap-2">
           <div className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-2.5 py-1 text-xs font-semibold text-white shadow-soft">
             SS
@@ -24,6 +25,7 @@ export default function Navbar() {
           </div>
         </NavLink>
 
+        {/* Links on the far right */}
         <nav className="flex items-center gap-1">
           <NavLink
             to="/"
