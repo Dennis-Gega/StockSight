@@ -19,7 +19,7 @@ std::vector<PriceBar> DB::fetch_prices(
         pqxx::connection c(conn_);
         pqxx::work tx(c);
 
-        // --- FINAL CORRECT QUERY ---
+        // Correct query — simple fetch by symbol
         std::string sql = R"SQL(
             SELECT symbol, time, open, high, low, close, volume
             FROM price_history
@@ -37,12 +37,26 @@ std::vector<PriceBar> DB::fetch_prices(
         for (auto const& row : r) {
             PriceBar p;
             p.ticker = row["symbol"].as<std::string>();
-            p.ts     = row["time"].as<std::string>();
+
+            // *** FIX TIMESTAMP FORMAT FOR REACT ***
+            std::string raw = row["time"].as<std::string>();
+
+            // Convert "2025-10-23 15:32:17.081769+00"
+            // → "2025-10-23T15:32:17.081769Z"
+            for (char &c : raw) {
+                if (c == ' ') c = 'T';
+            }
+            if (raw.back() != 'Z')
+                raw.push_back('Z');
+
+            p.ts = raw;
+
             p.open   = row["open"].as<double>();
             p.high   = row["high"].as<double>();
             p.low    = row["low"].as<double>();
             p.close  = row["close"].as<double>();
             p.volume = row["volume"].as<long long>();
+
             out.push_back(p);
         }
 

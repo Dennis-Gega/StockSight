@@ -13,7 +13,6 @@
 using json = nlohmann::json;
 
 int main() {
-    // Load DB connection string
     std::string db_uri = env_or("TIMESCALE_SERVICE_URL",
         "postgresql://postgres:postgres@localhost:5432/stocksight");
 
@@ -22,16 +21,13 @@ int main() {
     DB db(db_uri);
     httplib::Server server;
 
-    // -----------------------------------------
-    // Health check
-    // -----------------------------------------
     server.Get("/api/health", [&](const httplib::Request&, httplib::Response& res){
         res.set_content("{\"status\":\"ok\"}", "application/json");
     });
 
-    // -----------------------------------------
-    // GET /api/prices
-    // -----------------------------------------
+    // ---------------------------
+    // GET /api/prices (with 404)
+    // ---------------------------
     server.Get("/api/prices", [&](const httplib::Request& req, httplib::Response& res){
 
         try {
@@ -46,6 +42,18 @@ int main() {
 
             auto rows = db.fetch_prices(ticker, interval, start, end, limit);
 
+            // ❌ INVALID TICKER
+            if (rows.empty()) {
+                json err = {
+                    {"error", "Ticker not found"},
+                    {"ticker", ticker}
+                };
+                res.status = 404;
+                res.set_content(err.dump(), "application/json");
+                return;
+            }
+
+            // Normal success response
             json out;
             out["ticker"] = ticker;
             out["interval"] = interval;
@@ -71,8 +79,9 @@ int main() {
         }
     });
 
+
     // -----------------------------------------
-    // GET /api/indicators
+    // GET /api/indicators (with 404)
     // -----------------------------------------
     server.Get("/api/indicators", [&](const httplib::Request& req, httplib::Response& res){
 
@@ -81,6 +90,17 @@ int main() {
         int limit            = req.has_param("limit")    ? std::stoi(req.get_param_value("limit")) : 200;
 
         auto rows = db.fetch_prices(ticker, interval, "", "", limit);
+
+        // ❌ INVALID TICKER
+        if (rows.empty()) {
+            json err = {
+                {"error", "Ticker not found"},
+                {"ticker", ticker}
+            };
+            res.status = 404;
+            res.set_content(err.dump(), "application/json");
+            return;
+        }
 
         std::vector<double> close;
         close.reserve(rows.size());
@@ -139,9 +159,6 @@ int main() {
         res.set_content(out.dump(), "application/json");
     });
 
-    // -----------------------------------------
-    // Start server
-    // -----------------------------------------
     std::cout << "Listening on http://localhost:8080\n";
     server.listen("0.0.0.0", 8080);
 }

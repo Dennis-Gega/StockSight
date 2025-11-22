@@ -1,28 +1,78 @@
-const members = [
-  // add/change later
-  { name: "Noah Steinberg", role: "Frontend / Integration", img: "/team/noah.jpg" },
-  { name: "Member 2", role: "Backend (C++)", img: "/team/member2.jpg" },
-  { name: "Member 3", role: "Data / Indicators", img: "/team/member3.jpg" },
+// src/Team.jsx
+
+const teamMembers = [
+  {
+    name: "Noah Steinberg",
+    role: "Backend (C++)",
+    image: "/team/noah.jpg",
+  },
+  {
+    name: "Parth Sachdev",
+    role: "Frontend / Integration",
+    image: "/team/parth.jpg",
+  },
+  {
+    name: "Dennis Gega",
+    role: "Data & API",
+    image: "/team/dennis.jpg",
+  },
+  {
+    name: "Aaron Ngo",
+    role: "Frontend / Integration",
+    image: "/team/aaron.jpg",
+  },
+  {
+    name: "Abraham Ruiz",
+    role: "Frontend / Integration",
+    image: "/team/abraham.jpg",
+  },
 ];
 
 export default function Team() {
   return (
-    <section className="space-y-6">
-      <h1 className="text-3xl font-extrabold">Our Team</h1>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {members.map((m) => (
-          <article key={m.name} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 shadow-soft overflow-hidden">
-            <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-800">
-              <img src={m.img} alt={m.name} className="w-full h-full object-cover" />
+    <section className="space-y-8 pb-16">
+      {/* Page heading */}
+      <header className="space-y-2">
+        <h1 className="text-4xl font-extrabold tracking-tight">Our Team</h1>
+      </header>
+
+      {/* Team grid */}
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {teamMembers.map((member) => (
+          <article
+            key={member.name}
+            className="overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white/80 shadow-soft"
+          >
+            {/* Image area */}
+            <div className="relative h-64 bg-slate-100">
+              {/* If you don’t have images yet, this will just show the gray box */}
+              <img
+                src={member.image}
+                alt={member.name}
+                className="h-full w-full object-cover"
+                loading="lazy"
+                onError={(e) => {
+                  // hide broken image icon if file doesn't exist yet
+                  e.currentTarget.style.display = "none";
+                }}
+              />
             </div>
-            <div className="p-4">
-              <h3 className="font-semibold">{m.name}</h3>
-              <p className="text-sm text-slate-500">{m.role}</p>
+
+            {/* Name + role */}
+            <div className="border-t border-slate-200/70 bg-white/90 px-6 py-4">
+              <h2 className="text-lg font-semibold text-slate-900">
+                {member.name}
+              </h2>
+              <p className="text-sm text-slate-500">{member.role}</p>
             </div>
           </article>
         ))}
       </div>
-      <p className="text-sm text-slate-500">Put images in <code>/public/team/</code> (optional).</p>
+
+      <p className="text-xs text-slate-500">
+        Put images in <code>/public/team/</code> (optional), e.g.{" "}
+        <code>/public/team/noah.jpg</code>.
+      </p>
     </section>
   );
 }
