@@ -21,7 +21,7 @@ export default function PriceChart({ data, showBB = true }) {
         </div>
       </div>
 
-      <div className="h-[360px]">
+      <div className="h-[360px] min-h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
@@ -29,7 +29,6 @@ export default function PriceChart({ data, showBB = true }) {
           >
             <CartesianGrid strokeDasharray="3 3" />
 
-            {/* ⭐ SHOW X-AXIS so numbers render properly */}
             <XAxis
               dataKey="time"
               type="number"
@@ -40,9 +39,7 @@ export default function PriceChart({ data, showBB = true }) {
             <YAxis domain={["auto", "auto"]} />
 
             <Tooltip
-              labelFormatter={(unix) =>
-                new Date(unix).toLocaleString()
-              }
+              labelFormatter={(unix) => new Date(unix).toLocaleString()}
               contentStyle={{ fontSize: "0.8rem" }}
             />
 
