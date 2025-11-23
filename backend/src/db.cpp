@@ -21,12 +21,13 @@ std::vector<PriceBar> DB::fetch_prices(
 
         // Correct query — simple fetch by symbol
         std::string sql = R"SQL(
-            SELECT symbol, time, open, high, low, close, volume
-            FROM price_history
-            WHERE symbol = $1
-            ORDER BY time ASC
+            SELECT "Ticker" AS symbol, "Date" AS time, "Open" AS open, "High" AS high, "Low" AS low, "Close" AS close, "Volume" AS volume
+            FROM public.sp500_data
+            WHERE "Ticker" = $1
+            ORDER BY "Date" ASC
             LIMIT $2
         )SQL";
+
 
         auto r = tx.exec_params(sql, ticker, limit);
         tx.commit();
