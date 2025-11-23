@@ -38,7 +38,7 @@ export default function Home() {
         <div className="max-w-xl mx-auto bg-white/80 dark:bg-slate-900/70 rounded-2xl p-6 shadow-soft backdrop-blur">
           <TickerForm />
           <p className="mt-3 text-xs text-slate-500">
-            Try symbols like <strong>AAPL</strong>, <strong>MSFT</strong>, or <strong>SPY</strong>.
+            Try symbols like <strong>AAPL</strong>, <strong>MSFT</strong>, or <strong>NVDA</strong>.
           </p>
         </div>
 
