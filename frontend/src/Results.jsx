@@ -25,20 +25,15 @@ export default function Results() {
 
     (async () => {
       setLoading(true);
-
       try {
         const res = await fetchIndicators({ ticker, range, interval });
-
-        if (!cancelled) {
-          setData(res);
-        }
+        if (!cancelled) setData(res);
       } catch (e) {
         if (!cancelled) {
           const msg =
             e?.message && e.message !== "Failed to load indicator data"
               ? e.message
               : `Could not load data for ticker “${ticker}”.`;
-
           const qs = new URLSearchParams({ error: msg }).toString();
           navigate(`/?${qs}`, { replace: true });
         }
@@ -47,12 +42,9 @@ export default function Results() {
       }
     })();
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [ticker, range, interval, navigate]);
 
-  // Extract nested structure
   const inner = data?.data;
   const prices = inner?.prices || [];
   const indicators = inner?.indicators;
@@ -61,10 +53,8 @@ export default function Results() {
   const latestMacd = indicators?.macd?.macd?.at?.(-1);
   const signal = inner?.signal;
 
-  // Build chart data
   const chartData = useMemo(() => {
     if (!prices.length) return [];
-
     return prices.map((p, i) => ({
       time: new Date(p.t).getTime(),
       close: p.c ?? null,
@@ -74,24 +64,36 @@ export default function Results() {
   }, [prices, indicators]);
 
   if (loading) return <Loader />;
-
-  if (!inner) {
-    return (
-      <section className="mx-auto max-w-4xl py-10">
-        <ErrorMessage>No data returned for {ticker}.</ErrorMessage>
-      </section>
-    );
-  }
+  if (!inner) return <ErrorMessage>No data returned for {ticker}.</ErrorMessage>;
 
   return (
     <section className="mx-auto max-w-6xl py-8 space-y-6">
+
+      {/* Back button */}
+      <button
+        onClick={() => navigate("/")}
+        className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
+      >
+        ← Back to Home
+      </button>
+
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <p className="text-xs font-semibold tracking-[0.18em] uppercase text-indigo-500">
             Analysis overview
           </p>
 
-          <h2 className="text-3xl font-extrabold tracking-tight">{ticker}</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight">
+            {ticker} {" "}
+            <a
+              href={`https://finance.yahoo.com/quote/${ticker}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-600 hover:underline text-lg font-normal"
+            >
+              (Yahoo Finance)
+            </a>
+          </h2>
 
           <p className="text-sm text-slate-500">
             Range: {range} • Interval: {interval}
@@ -107,6 +109,7 @@ export default function Results() {
           rsi: latestRsi,
           macd: latestMacd,
         }}
+        showTooltips={true} // pass flag for tooltips
       />
 
       <PriceChart data={chartData} showBB={toggles.bb} />
