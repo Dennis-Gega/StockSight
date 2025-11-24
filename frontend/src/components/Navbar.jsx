@@ -1,4 +1,6 @@
 import { NavLink } from "react-router-dom";
+import TickerForm from "./TickerForm.jsx";
+import ErrorMessage from "./ErrorMessage.jsx";
 
 const linkBase =
   "px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:text-indigo-600";
@@ -8,7 +10,6 @@ const active =
 export default function Navbar() {
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200/70 dark:border-slate-800/70 backdrop-blur bg-white/70 dark:bg-slate-900/70 w-full">
-      {/* Flex container now stretches full width */}
       <div className="flex items-center justify-between max-w-full mx-4 py-3">
         {/* Brand on the far left */}
         <NavLink to="/" className="flex items-center gap-2">
