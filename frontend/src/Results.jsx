@@ -109,7 +109,7 @@ export default function Results() {
           rsi: latestRsi,
           macd: latestMacd,
         }}
-        showTooltips={true}
+        showTooltips={true} // pass flag for tooltips
       />
 
       <PriceChart data={chartData} showBB={toggles.bb} />
