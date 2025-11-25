@@ -1,71 +1,61 @@
 // src/components/TickerForm.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchIndicators } from "../lib/api.js";
 
-export default function TickerForm() {
-  const [ticker, setTicker] = useState("");
+export default function TickerForm({ onError }) {
+  const [tickerInput, setTickerInput] = useState("");
   const [range, setRange] = useState("1mo");
   const [interval, setInterval] = useState("1d");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!ticker) return;
+    if (!tickerInput) return;
 
-    const params = new URLSearchParams({
-      ticker: ticker.toUpperCase(),
-      range,
-      interval,
-    }).toString();
+    try {
+      const res = await fetchIndicators({
+        ticker: tickerInput,
+        range,
+        interval,
+      });
 
-    navigate(`/results?${params}`);
+      if (!res?.data) {
+        // invalid ticker: stay on home
+        onError && onError(`No data returned for ${tickerInput.toUpperCase()}`);
+        return;
+      }
+
+      // valid ticker: clear error and navigate
+      onError && onError("");
+      navigate(
+        `/results?ticker=${tickerInput.toUpperCase()}&range=${range}&interval=${interval}`
+      );
+    } catch (err) {
+      onError && onError(`No data returned for ${tickerInput.toUpperCase()}`);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      {/* Row 1: ticker input */}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
       <input
         type="text"
-        placeholder="Ticker symbol (e.g., AAPL)"
-        value={ticker}
-        onChange={(e) => setTicker(e.target.value)}
-        className="w-full rounded-lg border border-slate-200 px-3 py-2 shadow-sm
-                   focus:outline-none focus:ring-2 focus:ring-indigo-500
-                   text-sm"
+        value={tickerInput}
+        onChange={(e) => setTickerInput(e.target.value)}
+        placeholder="Enter ticker symbol"
+        className="rounded border px-3 py-2 w-full"
       />
-
-      {/* Row 2: range, interval, button */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <select
-          value={range}
-          onChange={(e) => setRange(e.target.value)}
-          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 shadow-sm
-                     focus:outline-none focus:ring-2 focus:ring-indigo-500
-                     text-sm"
-        >
+      <div className="flex gap-2">
+        <select value={range} onChange={(e) => setRange(e.target.value)} className="rounded border px-2 py-1">
           <option value="1mo">1 month</option>
           <option value="3mo">3 months</option>
           <option value="6mo">6 months</option>
-          <option value="1y">1 year</option>
         </select>
-
-        <select
-          value={interval}
-          onChange={(e) => setInterval(e.target.value)}
-          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 shadow-sm
-                     focus:outline-none focus:ring-2 focus:ring-indigo-500
-                     text-sm"
-        >
+        <select value={interval} onChange={(e) => setInterval(e.target.value)} className="rounded border px-2 py-1">
           <option value="1d">1 day</option>
           <option value="1wk">1 week</option>
         </select>
-
-        <button
-          type="submit"
-          className="w-full sm:w-auto rounded-lg bg-indigo-600 px-5 py-2
-                     text-sm font-semibold text-white
-                     hover:bg-indigo-700 transition-colors"
-        >
+        <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
           Analyze
         </button>
       </div>

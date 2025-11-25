@@ -8,11 +8,19 @@ import Team from "./Team.jsx";
 export default function App() {
   return (
     <BrowserRouter>
-      {/* full-page background */}
-      <div className="min-h-dvh w-full overflow-x-hidden bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-900 dark:to-slate-950 bg-dots">
+      {/* Full-page background wrapper */}
+      <div
+        className="
+          min-h-dvh w-full overflow-x-hidden
+          bg-gradient-to-br from-slate-50 to-indigo-50
+          dark:bg-[#0f1629]      /* Deep purple/navy background */
+          dark:bg-none           /* Disable gradient in dark mode */
+          bg-dots
+        "
+      >
         <Navbar />
 
-        {/* centered main content */}
+        {/* Centered main content */}
         <main className="mx-auto max-w-6xl px-4 py-8">
           <Routes>
             <Route path="/" element={<Home />} />

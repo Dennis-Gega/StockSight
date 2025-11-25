@@ -6,23 +6,29 @@ function getSignalStyles(signalRaw) {
   const signal = (signalRaw || "").toLowerCase();
   if (signal === "buy")
     return {
-      badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
-      value: "text-emerald-700",
-      label: "text-emerald-800",
+      badge: 
+            "bg-emerald-100 text-emerald-700 border-emerald-200 " +
+            "dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-500/40",
+      value: "text-emerald-700 dark:text-emerald-200",
+      label: "text-emerald-800 dark:text-emerald-100",
       arrow: "↑",
     };
   if (signal === "sell")
     return {
-      badge: "bg-rose-100 text-rose-700 border-rose-200",
-      value: "text-rose-700",
-      label: "text-rose-800",
+      badge: 
+            "bg-emerald-100 text-emerald-700 border-emerald-200 " +
+            "dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-500/40",
+      value: "text-emerald-700 dark:text-emerald-200",
+      label: "text-emerald-800 dark:text-emerald-100",
       arrow: "↓",
     };
   if (signal === "hold")
     return {
-      badge: "bg-amber-50 text-amber-700 border-amber-200",
-      value: "text-amber-700",
-      label: "text-amber-800",
+      badge:
+            "bg-red-100 text-red-700 border-red-200 " +
+            "dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/40",
+      value: "text-red-700 dark:text-red-300",
+      label: "text-red-700 dark:text-red-300",
       arrow: "→",
     };
   return {
@@ -63,7 +69,7 @@ export default function StatCards({ summary, showTooltips = false }) {
           className="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 p-5 shadow-soft flex flex-col justify-between"
         >
           <div className="flex items-center justify-between gap-2">
-            <div className="text-xs uppercase tracking-wide text-slate-500 flex items-center gap-1">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 flex items-center gap-1 dark:text-slate-200">
               {it.label}
               {showTooltips && it.tooltip && (
                 <div className="relative flex items-center">
