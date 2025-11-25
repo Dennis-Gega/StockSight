@@ -3,20 +3,27 @@ import { useState } from "react";
 import TickerForm from "./components/TickerForm.jsx";
 
 export default function Home() {
-  // Error message coming from TickerForm when a ticker is invalid
   const [tickerError, setTickerError] = useState("");
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] px-4 py-8">
-      {/* Bigger, wider central container */}
+    <main
+      className="
+        flex flex-col items-center justify-center
+        min-h-[calc(100vh-4rem)]
+        px-4 py-8
+        bg-white dark:bg-slate-900
+        text-slate-900 dark:text-slate-100
+      "
+    >
       <div className="grid w-full max-w-[1200px] gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-center">
-        {/* Left: Hero copy */}
+
+        {/* Left side */}
         <section className="space-y-6">
-          <p className="text-xs font-semibold tracking-[0.28em] text-indigo-500 uppercase">
+          <p className="text-xs font-semibold tracking-[0.28em] text-indigo-500 uppercase dark:text-indigo-400">
             STOCKSIGHT • TECHNICAL INDICATOR SANDBOX
           </p>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight text-slate-900 dark:text-slate-100">
             Test classic indicators.{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-fuchsia-500">
               See the signal clearly.
@@ -29,32 +36,37 @@ export default function Home() {
             a lightweight API.
           </p>
 
+          {/* Badges */}
           <div className="flex flex-wrap gap-3 pt-2">
-            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
+            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/70 px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 shadow-sm">
               ⚡ React + Vite frontend
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
+
+            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/70 px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 shadow-sm">
               📈 C++ indicator engine
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
-              📊 RSI, MACD &amp; Bollinger Bands
+
+            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/70 px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 shadow-sm">
+              📊 RSI, MACD & Bollinger Bands
             </span>
           </div>
         </section>
 
-        {/* Right: Quick test card */}
+        {/* Right: Quick Test Card */}
         <section className="w-full">
-          <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 shadow-soft backdrop-blur p-5 sm:p-6 space-y-4">
+          <div className="rounded-[1.75rem] border border-slate-200/80 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 shadow-soft backdrop-blur p-5 sm:p-6 space-y-4">
+
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold tracking-[0.22em] uppercase text-slate-500">
+                <p className="text-[11px] font-semibold tracking-[0.22em] uppercase text-slate-500 dark:text-slate-400">
                   Quick test
                 </p>
-                <p className="text-sm font-medium text-slate-800">
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
                   Run an indicator snapshot
                 </p>
               </div>
-              <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-600">
+
+              <span className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-300">
                 Live demo
               </span>
             </div>
@@ -62,20 +74,20 @@ export default function Home() {
             {/* Form */}
             <TickerForm onError={setTickerError} />
 
-            {/* Inline error for invalid tickers */}
+            {/* Inline error */}
             {tickerError && (
-              <p className="mt-3 text-xs text-red-600 bg-red-50/80 border border-red-200 rounded-lg px-3 py-2 text-left">
+              <p className="mt-3 text-xs text-red-600 dark:text-red-400 bg-red-50/80 dark:bg-red-900/40 border border-red-200 dark:border-red-700 rounded-lg px-3 py-2 text-left">
                 {tickerError}
               </p>
             )}
 
-            <p className="mt-2 text-[11px] text-slate-500">
+            <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
               Try symbols like <span className="font-semibold">AAPL</span>,{" "}
               <span className="font-semibold">MSFT</span>,{" "}
               <span className="font-semibold">NVDA</span>, or any other valid ticker.
             </p>
 
-            <p className="pt-2 text-[11px] text-slate-400 border-t border-slate-100 mt-2">
+            <p className="pt-2 text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-700 mt-2">
               Built with React + Vite • Backed by C++ + TimescaleDB
             </p>
           </div>

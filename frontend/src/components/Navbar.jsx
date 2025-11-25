@@ -5,7 +5,7 @@ import ErrorMessage from "./ErrorMessage.jsx";
 const linkBase =
   "px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:text-indigo-600";
 const active =
-  "text-indigo-700 bg-white/80 dark:bg-slate-900/70 shadow-soft";
+  "bg-white/80 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 shadow-soft";
 
 export default function Navbar() {
   return (
@@ -20,7 +20,8 @@ export default function Navbar() {
             <span className="font-extrabold tracking-tight text-lg">
               <span className="text-indigo-600">Stock</span>Sight
             </span>
-            <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+            <span className="text-xs font-medium tracking-[0.25em]
+                            text-slate-500 dark:text-slate-200 uppercase">
               Technical indicator sandbox
             </span>
           </div>
@@ -62,7 +63,7 @@ export default function Navbar() {
             href="https://recharts.org"
             target="_blank"
             rel="noreferrer"
-            className={`${linkBase} text-slate-500`}
+            className={`${linkBase} text-slate-500 dark:text-slate-200`}
           >
             Docs
           </a>
