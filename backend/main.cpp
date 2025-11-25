@@ -9,6 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <cmath>
 
 using json = nlohmann::json;
 
@@ -106,7 +107,7 @@ int main() {
         close.reserve(rows.size());
 
         json prices = json::array();
-        for (auto& r : rows){
+        for (auto& r : rows) {
             close.push_back(r.close);
             prices.push_back({
                 {"t", r.ts},
@@ -115,17 +116,17 @@ int main() {
         }
 
         auto rsiV = rsi(close, 14);
-        auto m = macd(close, 12, 26, 9);
-        auto bb = bollinger(close, 20, 2.0);
+        auto m    = macd(close, 12, 26, 9);
+        auto bb   = bollinger(close, 20, 2.0);
 
         json out;
-        out["ticker"] = ticker;
+        out["ticker"]   = ticker;
         out["interval"] = interval;
-        out["prices"] = prices;
+        out["prices"]   = prices;
 
-        auto to_arr = [](const std::vector<double>& v){
+        auto to_arr = [](const std::vector<double>& v) {
             json a = json::array();
-            for (double d : v){
+            for (double d : v) {
                 if (std::isnan(d)) a.push_back(nullptr);
                 else a.push_back(d);
             }
@@ -146,14 +147,89 @@ int main() {
             }}
         };
 
+        // ------------------------------------------------------------------
+        // Richer Buy / Sell / Hold signal:
+        //   - combines RSI, MACD, and Bollinger Bands into a single score.
+        // ------------------------------------------------------------------
         std::string signal = "Hold";
-        if (!rsiV.empty()) {
-            double last = rsiV.back();
-            if (!std::isnan(last)) {
-                if (last < 30) signal = "Buy";
-                else if (last > 70) signal = "Sell";
+
+        size_t n = close.size();
+        if (n >= 2 &&
+            rsiV.size() == n &&
+            m.macd.size() == n &&
+            m.signal.size() == n &&
+            bb.upper.size() == n &&
+            bb.lower.size() == n) {
+
+            size_t last = n - 1;
+            size_t prev = last > 0 ? last - 1 : last;
+
+            double score = 0.0;
+
+            double lastRsi = rsiV[last];
+            double prevRsi = rsiV[prev];
+
+            double lastMacd   = m.macd[last];
+            double prevMacd   = m.macd[prev];
+            double lastSignal = m.signal[last];
+            double prevSignal = m.signal[prev];
+
+            double lastClose  = close[last];
+            double lastUpper  = bb.upper[last];
+            double lastLower  = bb.lower[last];
+
+            // --- RSI component ---
+            if (!std::isnan(lastRsi)) {
+                if (lastRsi < 30.0)        score += 2.0;   // oversold
+                else if (lastRsi > 70.0)   score -= 2.0;   // overbought
+                else if (lastRsi < 40.0)   score += 0.5;   // mildly oversold
+                else if (lastRsi > 60.0)   score -= 0.5;   // mildly overbought
+
+                if (!std::isnan(prevRsi)) {
+                    double rsiDelta = lastRsi - prevRsi;
+                    if (rsiDelta > 1.0)      score += 0.5;  // RSI rising
+                    else if (rsiDelta < -1.0) score -= 0.5; // RSI falling
+                }
             }
+
+            // --- MACD component ---
+            if (!std::isnan(lastMacd) && !std::isnan(lastSignal)) {
+                // Crossovers
+                bool bullCross = (!std::isnan(prevMacd) && !std::isnan(prevSignal) &&
+                                  prevMacd <= prevSignal && lastMacd > lastSignal);
+                bool bearCross = (!std::isnan(prevMacd) && !std::isnan(prevSignal) &&
+                                  prevMacd >= prevSignal && lastMacd < lastSignal);
+
+                if (bullCross)      score += 2.0;
+                else if (bearCross) score -= 2.0;
+                else {
+                    if (lastMacd > lastSignal) score += 0.5;
+                    else if (lastMacd < lastSignal) score -= 0.5;
+                }
+            }
+
+            // --- Bollinger Bands component ---
+            if (!std::isnan(lastClose) &&
+                !std::isnan(lastUpper) &&
+                !std::isnan(lastLower)) {
+
+                double bandRange = lastUpper - lastLower;
+                if (bandRange > 0.0) {
+                    double pos = (lastClose - lastLower) / bandRange; // 0 = lower, 1 = upper
+
+                    if (pos < 0.1)       score += 1.0;  // hugging lower band
+                    else if (pos < 0.25) score += 0.5;
+                    else if (pos > 0.9)  score -= 1.0;  // hugging upper band
+                    else if (pos > 0.75) score -= 0.5;
+                }
+            }
+
+            // Final decision
+            if (score >= 2.0)      signal = "Buy";
+            else if (score <= -2.0) signal = "Sell";
+            else                    signal = "Hold";
         }
+
         out["signal"] = signal;
 
         res.set_content(out.dump(), "application/json");
