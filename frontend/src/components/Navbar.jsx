@@ -1,11 +1,10 @@
 import { NavLink } from "react-router-dom";
-import TickerForm from "./TickerForm.jsx";
-import ErrorMessage from "./ErrorMessage.jsx";
 
 const linkBase =
-  "px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:text-indigo-600";
-const active =
-  "bg-white/80 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 shadow-soft";
+  "px-3 py-2 rounded-lg text-sm font-medium transition-colors " +
+  "text-slate-600 dark:text-slate-200 hover:text-indigo-500 dark:hover:text-indigo-300";
+
+const active = "text-slate-900 dark:text-white";
 
 export default function Navbar() {
   return (
@@ -20,8 +19,7 @@ export default function Navbar() {
             <span className="font-extrabold tracking-tight text-lg">
               <span className="text-indigo-600">Stock</span>Sight
             </span>
-            <span className="text-xs font-medium tracking-[0.25em]
-                            text-slate-500 dark:text-slate-200 uppercase">
+            <span className="text-xs font-medium tracking-[0.25em] text-slate-500 dark:text-slate-200 uppercase">
               Technical indicator sandbox
             </span>
           </div>
@@ -32,9 +30,7 @@ export default function Navbar() {
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `${linkBase} ${
-                isActive ? active : "text-slate-600 dark:text-slate-200"
-              }`
+              `${linkBase} ${isActive ? active : ""}`
             }
           >
             Home
@@ -42,9 +38,7 @@ export default function Navbar() {
           <NavLink
             to="/about"
             className={({ isActive }) =>
-              `${linkBase} ${
-                isActive ? active : "text-slate-600 dark:text-slate-200"
-              }`
+              `${linkBase} ${isActive ? active : ""}`
             }
           >
             About
@@ -52,9 +46,7 @@ export default function Navbar() {
           <NavLink
             to="/team"
             className={({ isActive }) =>
-              `${linkBase} ${
-                isActive ? active : "text-slate-600 dark:text-slate-200"
-              }`
+              `${linkBase} ${isActive ? active : ""}`
             }
           >
             Team
@@ -63,7 +55,7 @@ export default function Navbar() {
             href="https://recharts.org"
             target="_blank"
             rel="noreferrer"
-            className={`${linkBase} text-slate-500 dark:text-slate-200`}
+            className={linkBase}
           >
             Docs
           </a>

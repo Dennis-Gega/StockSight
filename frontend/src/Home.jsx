@@ -11,7 +11,6 @@ export default function Home() {
         flex flex-col items-center justify-center
         min-h-[calc(100vh-4rem)]
         px-4 py-8
-        bg-white dark:bg-slate-900
         text-slate-900 dark:text-slate-100
       "
     >
