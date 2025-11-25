@@ -22,16 +22,21 @@ export default function Home() {
         <div className="grid items-center gap-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
           {/* LEFT: headline + copy */}
           <div className="space-y-8">
-            <p className="text-xs font-semibold tracking-[0.3em] text-indigo-500 uppercase">
+            <p className="text-xs font-semibold tracking-[0.3em]
+                  text-indigo-500 dark:text-indigo-500 uppercase">
               STOCKSIGHT • TECHNICAL INDICATOR SANDBOX
             </p>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05]">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05]
+                          text-slate-900 dark:text-slate-300">
               Test classic indicators.{" "}
-              <span className="text-indigo-600">See the signal clearly.</span>
+              <span className="text-indigo-600 dark:text-indigo-500">
+                See the signal clearly.
+              </span>
             </h1>
 
-            <p className="max-w-xl text-base sm:text-lg text-slate-600 dark:text-slate-300">
+            <p className="mt-5 max-w-xl text-base sm:text-lg 
+                          text-slate-600 dark:text-slate-700">
               Enter a ticker and instantly visualize price, RSI, MACD, and Bollinger
               Bands — with Buy / Sell / Hold signals computed by a C++ backend
               and served through a lightweight API.
@@ -39,13 +44,25 @@ export default function Home() {
 
             {/* Tech badges */}
             <div className="flex flex-wrap gap-3 text-xs sm:text-sm">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-slate-700 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full
+                   border border-slate-200 dark:border-slate-700
+                   bg-white/70 dark:bg-slate-900/70
+                   px-3 py-1 text-slate-700 dark:text-slate-100
+                   shadow-sm">
                 ⚡ React + Vite frontend
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-slate-700 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full
+                   border border-slate-200 dark:border-slate-700
+                   bg-white/70 dark:bg-slate-900/70
+                   px-3 py-1 text-slate-700 dark:text-slate-100
+                   shadow-sm">
                 🧮 C++ indicator engine
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-slate-700 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full
+                   border border-slate-200 dark:border-slate-700
+                   bg-white/70 dark:bg-slate-900/70
+                   px-3 py-1 text-slate-700 dark:text-slate-100
+                   shadow-sm">
                 📈 RSI, MACD &amp; Bollinger Bands
               </span>
             </div>
@@ -53,13 +70,18 @@ export default function Home() {
 
           {/* RIGHT: quick test card */}
           <div className="flex justify-center lg:justify-end">
-            <div className="w-full max-w-md rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
-              <div className="mb-3 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                <span>Quick test</span>
-                <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-600">
-                  Live demo
-                </span>
-              </div>
+          <div className="w-full max-w-md rounded-3xl
+                          border border-slate-200/80 dark:border-slate-700
+                          bg-white/80 dark:bg-slate-900/85
+                          p-6 shadow-xl backdrop-blur-sm">
+            <div className="mb-3 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
+              <span>Quick test</span>
+              <span className="rounded-full bg-indigo-50 dark:bg-indigo-500/20
+                              px-2 py-0.5 text-[10px] font-semibold
+                              text-indigo-600 dark:text-indigo-300">
+                Live demo
+              </span>
+            </div>
 
               {/* Keep your existing TickerForm, just lives here */}
               <div className="space-y-3">
