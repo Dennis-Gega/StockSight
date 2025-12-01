@@ -4,33 +4,41 @@ function safeNum(x) {
 
 function getSignalStyles(signalRaw) {
   const signal = (signalRaw || "").toLowerCase();
+
+  // BUY (green)
   if (signal === "buy")
     return {
-      badge: 
-            "bg-emerald-100 text-emerald-700 border-emerald-200 " +
-            "dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-500/40",
-      value: "text-emerald-700 dark:text-emerald-200",
-      label: "text-emerald-800 dark:text-emerald-100",
+      badge:
+        "bg-emerald-100 text-emerald-700 border-emerald-200 " +
+        "dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-500/40",
+      value: "text-emerald-600 dark:text-emerald-300",
+      label: "text-emerald-700 dark:text-emerald-200",
       arrow: "↑",
     };
+
+  // SELL (red)
   if (signal === "sell")
     return {
-      badge: 
-            "bg-emerald-100 text-emerald-700 border-emerald-200 " +
-            "dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-500/40",
-      value: "text-emerald-700 dark:text-emerald-200",
-      label: "text-emerald-800 dark:text-emerald-100",
+      badge:
+        "bg-red-100 text-red-700 border-red-200 " +
+        "dark:bg-red-500/20 dark:text-red-300 dark:border-red-600/40",
+      value: "text-red-600 dark:text-red-300",
+      label: "text-red-700 dark:text-red-300",
       arrow: "↓",
     };
+
+  // HOLD (orange)
   if (signal === "hold")
     return {
       badge:
-            "bg-red-100 text-red-700 border-red-200 " +
-            "dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/40",
-      value: "text-red-700 dark:text-red-300",
-      label: "text-red-700 dark:text-red-300",
+        "bg-orange-100 text-orange-700 border-orange-200 " +
+        "dark:bg-orange-500/20 dark:text-orange-300 dark:border-orange-600/40",
+      value: "text-orange-600 dark:text-orange-300",
+      label: "text-orange-700 dark:text-orange-300",
       arrow: "→",
     };
+
+  // Default (neutral)
   return {
     badge: "bg-slate-100 text-slate-700 border-slate-200",
     value: "text-slate-800",
@@ -90,6 +98,7 @@ export default function StatCards({ summary, showTooltips = false }) {
               </span>
             )}
           </div>
+
           <div
             className={`mt-2 text-2xl font-semibold ${
               it.highlight ? signalStyles.value : ""

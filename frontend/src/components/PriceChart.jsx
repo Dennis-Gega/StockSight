@@ -42,7 +42,9 @@ export default function PriceChart({ data, showBB = true }) {
             <XAxis
               dataKey="time"
               type="number"
+              // flip the axis: newest date on the left, oldest on the right
               domain={["dataMin", "dataMax"]}
+
               tickFormatter={(unix) => new Date(unix).toLocaleDateString()}
               stroke={axisColor}
               tick={{ fill: axisColor, fontSize: 11 }}
