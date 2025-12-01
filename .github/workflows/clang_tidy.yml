@@ -1,0 +1,38 @@
+name: Clang-Tidy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  clang-tidy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-tidy cmake ninja-build
+
+    - name: Configure CMake
+      working-directory: backend
+      run: |
+        cmake -B build -G Ninja \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DCMAKE_BUILD_TYPE=Debug
+
+    - name: Run clang-tidy
+      working-directory: backend
+      run: |
+        find src include -type f \( \
+            -name '*.cpp' -o -name '*.cc' -o \
+            -name '*.hpp' -o -name '*.h' \
+          \) | xargs clang-tidy -p build --warnings-as-errors='*'
+
+    - name: Check for issues
+      if: failure()
+      run: echo "Clang-tidy found issues. Please fix them before merging."
