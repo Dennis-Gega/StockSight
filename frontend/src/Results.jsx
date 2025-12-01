@@ -42,7 +42,9 @@ export default function Results() {
       }
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [ticker, range, interval, navigate]);
 
   const inner = data?.data;
@@ -67,7 +69,8 @@ export default function Results() {
   if (!inner) return <ErrorMessage>No data returned for {ticker}.</ErrorMessage>;
 
   return (
-    <section className="mx-auto max-w-6xl py-8 space-y-6">
+    <section className="mx-auto max-w-6xl py-8 space-y-6
+                        text-slate-900 dark:text-slate-100">
 
       {/* Back button */}
       <button
@@ -79,23 +82,28 @@ export default function Results() {
 
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold tracking-[0.18em] uppercase text-indigo-500">
-            Analysis overview
+          {/* Strong label */}
+          <p className="text-xs font-semibold tracking-[0.18em] uppercase 
+                        text-indigo-600 dark:text-indigo-300">
+            ANALYSIS OVERVIEW
           </p>
 
-          <h2 className="text-3xl font-extrabold tracking-tight">
-            {ticker} {" "}
+          {/* Strong heading */}
+          <h2 className="mt-1 text-3xl sm:text-4xl font-extrabold
+                         text-slate-900 dark:text-white">
+            {ticker}{" "}
             <a
               href={`https://finance.yahoo.com/quote/${ticker}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-indigo-600 hover:underline text-lg font-normal"
+              className="text-indigo-600 dark:text-indigo-300 hover:underline text-lg font-normal"
             >
               (Yahoo Finance)
             </a>
           </h2>
 
-          <p className="text-sm text-slate-500">
+          {/* Strong subheading */}
+          <p className="text-sm text-slate-600 dark:text-slate-300">
             Range: {range} • Interval: {interval}
           </p>
         </div>
@@ -109,7 +117,7 @@ export default function Results() {
           rsi: latestRsi,
           macd: latestMacd,
         }}
-        showTooltips={true} // pass flag for tooltips
+        showTooltips={true}
       />
 
       <PriceChart data={chartData} showBB={toggles.bb} />

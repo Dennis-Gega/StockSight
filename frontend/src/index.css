@@ -10,8 +10,16 @@ body {
   overflow-x: hidden;
 }
 
-/* optional subtle dotted background */
+/* subtle dotted background for LIGHT mode */
 .bg-dots {
   background-image: radial-gradient(rgba(30,41,59,.12) 1px, transparent 1px);
   background-size: 18px 18px;
+}
+
+/* make dots stand out more in DARK mode */
+@media (prefers-color-scheme: dark) {
+  .bg-dots {
+    /* slightly brighter, higher-contrast dots */
+    background-image: radial-gradient(rgba(148,163,184,0.38) 1px, transparent 1px);
+  }
 }

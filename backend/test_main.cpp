@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <thread>
+#include <vector>
 #include "./lib/cpp-httplib.h"
 #include "./include/config.hpp"
 #include "./include/db.hpp"
@@ -39,6 +40,7 @@ TEST(Database, BasicConnection) {
     EXPECT_NO_THROW({
         DB db(url);
         auto rows = db.fetch_prices("AAPL", "1d", "", "", 5);
+        (void)rows;
     });
 }
 
@@ -53,6 +55,8 @@ TEST(Indicators, RSIWorks) {
 
 TEST(Indicators, MACDWorks) {
     std::vector<double> close = {1,2,3,4,5,6,7,8,9,10};
-    auto m = macd(close);
+    auto m = macd(close);  // uses defaults: 12,26,9,false
     EXPECT_EQ(m.macd.size(), close.size());
+    EXPECT_EQ(m.signal.size(), close.size());
+    EXPECT_EQ(m.hist.size(), close.size());
 }
