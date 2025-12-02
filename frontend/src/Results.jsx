@@ -55,15 +55,42 @@ export default function Results() {
   const latestMacd = indicators?.macd?.macd?.at?.(-1);
   const signal = inner?.signal;
 
+  // ----------------------------------------------------------
+  // FINAL FULL RANGE SLICER (1mo, 3mo, 6mo, 1y)
+  // ----------------------------------------------------------
   const chartData = useMemo(() => {
     if (!prices.length) return [];
-    return prices.map((p, i) => ({
+
+    const lastTs = prices[prices.length - 1]?.t;
+    const refDate = lastTs ? new Date(lastTs) : new Date();
+
+    const cutoff = new Date(refDate);
+
+    if (range === "1mo") {
+      cutoff.setMonth(cutoff.getMonth() - 1);
+    } else if (range === "3mo") {
+      cutoff.setMonth(cutoff.getMonth() - 3);
+    } else if (range === "6mo") {
+      cutoff.setMonth(cutoff.getMonth() - 6);
+    } else if (range === "1y") {
+      cutoff.setFullYear(cutoff.getFullYear() - 1);
+    } else {
+      cutoff.setMonth(cutoff.getMonth() - 3); // default fallback
+    }
+
+    const cutoffMs = cutoff.getTime();
+
+    // convert prices to chart format
+    const rows = prices.map((p, i) => ({
       time: new Date(p.t).getTime(),
       close: p.c ?? null,
       bb_upper: indicators?.bb?.upper?.[i] ?? null,
       bb_lower: indicators?.bb?.lower?.[i] ?? null,
     }));
-  }, [prices, indicators]);
+
+    // REAL range filter
+    return rows.filter(row => row.time >= cutoffMs);
+  }, [prices, indicators, range]);
 
   if (loading) return <Loader />;
   if (!inner) return <ErrorMessage>No data returned for {ticker}.</ErrorMessage>;
@@ -72,7 +99,6 @@ export default function Results() {
     <section className="mx-auto max-w-6xl py-8 space-y-6
                         text-slate-900 dark:text-slate-100">
 
-      {/* Back button */}
       <button
         onClick={() => navigate("/")}
         className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
@@ -82,13 +108,11 @@ export default function Results() {
 
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          {/* Strong label */}
           <p className="text-xs font-semibold tracking-[0.18em] uppercase 
                         text-indigo-600 dark:text-indigo-300">
             ANALYSIS OVERVIEW
           </p>
 
-          {/* Strong heading */}
           <h2 className="mt-1 text-3xl sm:text-4xl font-extrabold
                          text-slate-900 dark:text-white">
             {ticker}{" "}
@@ -102,7 +126,6 @@ export default function Results() {
             </a>
           </h2>
 
-          {/* Strong subheading */}
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Range: {range} • Interval: {interval}
           </p>
