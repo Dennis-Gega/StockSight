@@ -61,25 +61,6 @@ export default function Results() {
   const chartData = useMemo(() => {
     if (!prices.length) return [];
 
-    const lastTs = prices[prices.length - 1]?.t;
-    const refDate = lastTs ? new Date(lastTs) : new Date();
-
-    const cutoff = new Date(refDate);
-
-    if (range === "1mo") {
-      cutoff.setMonth(cutoff.getMonth() - 1);
-    } else if (range === "3mo") {
-      cutoff.setMonth(cutoff.getMonth() - 3);
-    } else if (range === "6mo") {
-      cutoff.setMonth(cutoff.getMonth() - 6);
-    } else if (range === "1y") {
-      cutoff.setFullYear(cutoff.getFullYear() - 1);
-    } else {
-      cutoff.setMonth(cutoff.getMonth() - 3); // default fallback
-    }
-
-    const cutoffMs = cutoff.getTime();
-
     // convert prices to chart format
     const rows = prices.map((p, i) => ({
       time: new Date(p.t).getTime(),
@@ -88,17 +69,35 @@ export default function Results() {
       bb_lower: indicators?.bb?.lower?.[i] ?? null,
     }));
 
-    // REAL range filter
-    return rows.filter(row => row.time >= cutoffMs);
+    // backfill Bollinger so the lines start at the left edge
+    let firstIdx = -1;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].bb_upper != null && rows[i].bb_lower != null) {
+        firstIdx = i;
+        break;
+      }
+    }
+
+    if (firstIdx > 0) {
+      const firstUpper = rows[firstIdx].bb_upper;
+      const firstLower = rows[firstIdx].bb_lower;
+      for (let i = 0; i < firstIdx; i++) {
+        rows[i].bb_upper = firstUpper;
+        rows[i].bb_lower = firstLower;
+      }
+    }
+
+    return rows;
   }, [prices, indicators, range]);
 
   if (loading) return <Loader />;
   if (!inner) return <ErrorMessage>No data returned for {ticker}.</ErrorMessage>;
 
   return (
-    <section className="mx-auto max-w-6xl py-8 space-y-6
-                        text-slate-900 dark:text-slate-100">
-
+    <section
+      className="mx-auto max-w-6xl py-8 space-y-6
+                        text-slate-900 dark:text-slate-100"
+    >
       <button
         onClick={() => navigate("/")}
         className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
@@ -108,13 +107,17 @@ export default function Results() {
 
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold tracking-[0.18em] uppercase 
-                        text-indigo-600 dark:text-indigo-300">
+          <p
+            className="text-xs font-semibold tracking-[0.18em] uppercase 
+                        text-indigo-600 dark:text-indigo-300"
+          >
             ANALYSIS OVERVIEW
           </p>
 
-          <h2 className="mt-1 text-3xl sm:text-4xl font-extrabold
-                         text-slate-900 dark:text-white">
+          <h2
+            className="mt-1 text-3xl sm:text-4xl font-extrabold
+                         text-slate-900 dark:text-white"
+          >
             {ticker}{" "}
             <a
               href={`https://finance.yahoo.com/quote/${ticker}`}
