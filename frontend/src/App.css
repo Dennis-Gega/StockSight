@@ -1,10 +1,10 @@
+/* Make the React root fill the whole viewport width/height */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  min-height: 100vh;
 }
 
+/* The rest is just the default Vite logo stuff, unchanged */
 .logo {
   height: 6em;
   padding: 1.5em;
