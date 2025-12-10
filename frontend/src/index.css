@@ -1,25 +1,8 @@
 /* Tailwind v4: single import */
 @import "tailwindcss";
 
-/* Global: prevent sideways scrolling and remove default body margin */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  overflow-x: hidden;
-}
-
-/* subtle dotted background for LIGHT mode */
+/* optional subtle dotted background */
 .bg-dots {
   background-image: radial-gradient(rgba(30,41,59,.12) 1px, transparent 1px);
   background-size: 18px 18px;
-}
-
-/* make dots stand out more in DARK mode */
-@media (prefers-color-scheme: dark) {
-  .bg-dots {
-    /* slightly brighter, higher-contrast dots */
-    background-image: radial-gradient(rgba(148,163,184,0.38) 1px, transparent 1px);
-  }
 }

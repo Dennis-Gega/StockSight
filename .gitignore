@@ -26,6 +26,3 @@ dist-ssr
 build/
 .zed/
 .cache/
-.env
-myenv/
-venv/

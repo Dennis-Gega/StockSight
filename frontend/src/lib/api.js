@@ -1,73 +1,14 @@
-// src/lib/api.js
+import axios from "axios";
 
-const API_ROOT = "/api";
+const baseURL = import.meta.env.VITE_API_BASE_URL || "/api";
 
-function buildParams(params = {}) {
-  const search = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      search.set(key, String(value));
-    }
-  });
-  return search.toString();
-}
+export const api = axios.create({
+  baseURL,
+  timeout: 15000,
+});
 
-async function parseError(res) {
-  try {
-    const data = await res.json();
-    return data?.error || null;
-  } catch {
-    return null;
-  }
-}
-
-// indicators
-export async function fetchIndicators({ ticker, range, interval }) {
-  const qs = buildParams({
-    ticker: ticker?.toUpperCase(),
-    range,
-    interval,
-    limit: 500,
-  });
-
-  const res = await fetch(`${API_ROOT}/indicators?${qs}`);
-
-  if (!res.ok) {
-    const err = await parseError(res);
-    return {
-      ok: false,
-      error: err || `Failed with status ${res.status}`,
-    };
-  }
-
-  return {
-    ok: true,
-    data: await res.json(),
-  };
-}
-
-
-//  prices (if you need them)
-export async function fetchPrices({ ticker, range, interval, limit }) {
-  const qs = buildParams({
-    ticker: ticker?.toUpperCase(),
-    range,
-    interval,
-    limit: limit || 500,
-  });
-
-  const res = await fetch(`${API_ROOT}/prices?${qs}`);
-
-  if (!res.ok) {
-    const err = await parseError(res);
-    return {
-      ok: false,
-      error: err || `Failed with status ${res.status}`,
-    };
-  }
-
-  return {
-    ok: true,
-    data: await res.json(),
-  };
+export async function fetchIndicators({ ticker, range = "1mo", interval = "1d" }) {
+  // Adjust path/params to match your C++ endpoints.
+  const res = await api.get("/indicators", { params: { ticker, range, interval } });
+  return res.data;
 }

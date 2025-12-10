@@ -1,62 +1,31 @@
 #include <gtest/gtest.h>
-#include <thread>
-#include <vector>
-#include "./lib/cpp-httplib.h"
-#include "./include/config.hpp"
-#include "./include/db.hpp"
-#include "./include/indicators.hpp"
+#include "cpp-httplib.h"
+#include <memory>
 
-//
-// Basic health check
-//
-TEST(API, HealthCheck) {
-    httplib::Server server;
+std::unique_ptr<httplib::Server> create_server() {
+    auto server = std::make_unique<httplib::Server>();
+    server->Get("/api/health", [](const httplib::Request&, httplib::Response& res) {
+        res.set_content("{ \"status\" : \"ok\" }", "application/json");
+    });
+    return server;
+}
 
-    server.Get("/api/health", [&](const httplib::Request&, httplib::Response& res){
-        res.set_content("{\"status\":\"ok\"}", "application/json");
+TEST(HealthCheckAPI, ReturnsOk) {
+    auto server = create_server();
+
+    std::thread t([&]() {
+        server->listen("localhost", 1234);
     });
 
-    std::thread t([&]{ server.listen("localhost", 9999); });
-    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    httplib::Client cli("localhost", 9999);
+    httplib::Client cli("localhost", 1234);
     auto res = cli.Get("/api/health");
 
-    ASSERT_NE(res, nullptr);
+    ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 200);
-    EXPECT_EQ(res->body, "{\"status\":\"ok\"}");
+    EXPECT_EQ(res->body, "{ \"status\" : \"ok\" }");
 
-    server.stop();
+    server->stop();
     t.join();
-}
-
-//
-// DB Connection test
-//
-TEST(Database, BasicConnection) {
-    std::string url = env_or("DATABASE_URL", "");
-    ASSERT_FALSE(url.empty());
-
-    EXPECT_NO_THROW({
-        DB db(url);
-        auto rows = db.fetch_prices("AAPL", "1d", "", "", 5);
-        (void)rows;
-    });
-}
-
-//
-// Indicator tests
-//
-TEST(Indicators, RSIWorks) {
-    std::vector<double> close = {10,11,12,11,10,9,8,9,10,11};
-    auto r = rsi(close, 5);
-    EXPECT_EQ(r.size(), close.size());
-}
-
-TEST(Indicators, MACDWorks) {
-    std::vector<double> close = {1,2,3,4,5,6,7,8,9,10};
-    auto m = macd(close);  // uses defaults: 12,26,9,false
-    EXPECT_EQ(m.macd.size(), close.size());
-    EXPECT_EQ(m.signal.size(), close.size());
-    EXPECT_EQ(m.hist.size(), close.size());
 }

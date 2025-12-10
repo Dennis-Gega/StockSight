@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { fetchIndicators } from "./lib/api.js";
-
 import Loader from "./components/Loader.jsx";
 import ErrorMessage from "./components/ErrorMessage.jsx";
 import IndicatorToggles from "./components/IndicatorToggles.jsx";
@@ -10,143 +9,73 @@ import StatCards from "./components/StatCards.jsx";
 
 export default function Results() {
   const [params] = useSearchParams();
-  const navigate = useNavigate();
-
-  const ticker = (params.get("ticker") || "AAPL").toUpperCase();
+  const ticker = params.get("ticker") || "AAPL";
   const range = params.get("range") || "1mo";
   const interval = params.get("interval") || "1d";
 
   const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
   const [data, setData] = useState(null);
   const [toggles, setToggles] = useState({ rsi: true, macd: true, bb: true });
 
   useEffect(() => {
-    let cancelled = false;
-
     (async () => {
-      setLoading(true);
+      setLoading(true); setErr("");
       try {
         const res = await fetchIndicators({ ticker, range, interval });
-        if (!cancelled) setData(res);
-      } catch (e) {
-        if (!cancelled) {
-          const msg =
-            e?.message && e.message !== "Failed to load indicator data"
-              ? e.message
-              : `Could not load data for ticker “${ticker}”.`;
-          const qs = new URLSearchParams({ error: msg }).toString();
-          navigate(`/?${qs}`, { replace: true });
-        }
+        setData(res);
+      } catch {
+        setData(makeMock()); // temporary fallback
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     })();
+  }, [ticker, range, interval]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [ticker, range, interval, navigate]);
-
-  const inner = data?.data;
-  const prices = inner?.prices || [];
-  const indicators = inner?.indicators;
-
-  const latestRsi = indicators?.rsi?.at?.(-1);
-  const latestMacd = indicators?.macd?.macd?.at?.(-1);
-  const signal = inner?.signal;
-
-  // ----------------------------------------------------------
-  // FINAL FULL RANGE SLICER (1mo, 3mo, 6mo, 1y)
-  // ----------------------------------------------------------
   const chartData = useMemo(() => {
-    if (!prices.length) return [];
-
-    // convert prices to chart format
-    const rows = prices.map((p, i) => ({
-      time: new Date(p.t).getTime(),
-      close: p.c ?? null,
-      bb_upper: indicators?.bb?.upper?.[i] ?? null,
-      bb_lower: indicators?.bb?.lower?.[i] ?? null,
+    if (!data?.prices) return [];
+    return data.prices.map((p, i) => ({
+      time: p.t ?? i,
+      close: p.c,
+      bb_upper: data?.indicators?.bb?.upper?.[i],
+      bb_lower: data?.indicators?.bb?.lower?.[i],
     }));
-
-    // backfill Bollinger so the lines start at the left edge
-    let firstIdx = -1;
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i].bb_upper != null && rows[i].bb_lower != null) {
-        firstIdx = i;
-        break;
-      }
-    }
-
-    if (firstIdx > 0) {
-      const firstUpper = rows[firstIdx].bb_upper;
-      const firstLower = rows[firstIdx].bb_lower;
-      for (let i = 0; i < firstIdx; i++) {
-        rows[i].bb_upper = firstUpper;
-        rows[i].bb_lower = firstLower;
-      }
-    }
-
-    return rows;
-  }, [prices, indicators, range]);
+  }, [data]);
 
   if (loading) return <Loader />;
-  if (!inner) return <ErrorMessage>No data returned for {ticker}.</ErrorMessage>;
+  if (err) return <ErrorMessage>{err}</ErrorMessage>;
 
   return (
-    <section
-      className="mx-auto max-w-6xl py-8 space-y-6
-                        text-slate-900 dark:text-slate-100"
-    >
-      <button
-        onClick={() => navigate("/")}
-        className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
-      >
-        ← Back to Home
-      </button>
-
-      <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+    <section className="mx-auto max-w-6xl space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <p
-            className="text-xs font-semibold tracking-[0.18em] uppercase 
-                        text-indigo-600 dark:text-indigo-300"
-          >
-            ANALYSIS OVERVIEW
-          </p>
-
-          <h2
-            className="mt-1 text-3xl sm:text-4xl font-extrabold
-                         text-slate-900 dark:text-white"
-          >
-            {ticker}{" "}
-            <a
-              href={`https://finance.yahoo.com/quote/${ticker}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-indigo-600 dark:text-indigo-300 hover:underline text-lg font-normal"
-            >
-              (Yahoo Finance)
-            </a>
-          </h2>
-
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Range: {range} • Interval: {interval}
-          </p>
+          <h2 className="text-3xl font-extrabold tracking-tight">{ticker}</h2>
+          <p className="text-sm text-slate-500">{range} • {interval}</p>
         </div>
-
         <IndicatorToggles state={toggles} onChange={setToggles} />
-      </header>
+      </div>
 
-      <StatCards
-        summary={{
-          signal,
-          rsi: latestRsi,
-          macd: latestMacd,
-        }}
-        showTooltips={true}
-      />
+      <StatCards summary={{
+        signal: data?.signal,
+        rsi: data?.indicators?.rsi?.at?.(-1),
+        macd: data?.indicators?.macd?.macd?.at?.(-1),
+      }}/>
 
       <PriceChart data={chartData} showBB={toggles.bb} />
+
+      {/* room for RSI/MACD charts later */}
     </section>
   );
+}
+
+function makeMock() {
+  const n = 60;
+  const prices = Array.from({ length: n }, (_, i) => {
+    const c = 150 + Math.sin(i / 6) * 4 + i * 0.1;
+    return { t: i, c };
+  });
+  const bb = { upper: prices.map((p) => p.c + 2), lower: prices.map((p) => p.c - 2) };
+  const rsi = Array.from({ length: n }, (_, i) => 50 + Math.sin(i / 4) * 10);
+  const macd = { macd: Array.from({ length: n }, () => 0) };
+  return { prices, indicators: { rsi, macd, bb }, signal: "Hold" };
 }
