@@ -55,49 +55,24 @@ export default function Results() {
   const latestMacd = indicators?.macd?.macd?.at?.(-1);
   const signal = inner?.signal;
 
-  // ----------------------------------------------------------
-  // FINAL FULL RANGE SLICER (1mo, 3mo, 6mo, 1y)
-  // ----------------------------------------------------------
   const chartData = useMemo(() => {
     if (!prices.length) return [];
-
-    // convert prices to chart format
-    const rows = prices.map((p, i) => ({
+    return prices.map((p, i) => ({
       time: new Date(p.t).getTime(),
       close: p.c ?? null,
       bb_upper: indicators?.bb?.upper?.[i] ?? null,
       bb_lower: indicators?.bb?.lower?.[i] ?? null,
     }));
-
-    // backfill Bollinger so the lines start at the left edge
-    let firstIdx = -1;
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i].bb_upper != null && rows[i].bb_lower != null) {
-        firstIdx = i;
-        break;
-      }
-    }
-
-    if (firstIdx > 0) {
-      const firstUpper = rows[firstIdx].bb_upper;
-      const firstLower = rows[firstIdx].bb_lower;
-      for (let i = 0; i < firstIdx; i++) {
-        rows[i].bb_upper = firstUpper;
-        rows[i].bb_lower = firstLower;
-      }
-    }
-
-    return rows;
-  }, [prices, indicators, range]);
+  }, [prices, indicators]);
 
   if (loading) return <Loader />;
   if (!inner) return <ErrorMessage>No data returned for {ticker}.</ErrorMessage>;
 
   return (
-    <section
-      className="mx-auto max-w-6xl py-8 space-y-6
-                        text-slate-900 dark:text-slate-100"
-    >
+    <section className="mx-auto max-w-6xl py-8 space-y-6
+                        text-slate-900 dark:text-slate-100">
+
+      {/* Back button */}
       <button
         onClick={() => navigate("/")}
         className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
@@ -107,17 +82,15 @@ export default function Results() {
 
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <p
-            className="text-xs font-semibold tracking-[0.18em] uppercase 
-                        text-indigo-600 dark:text-indigo-300"
-          >
+          {/* Strong label */}
+          <p className="text-xs font-semibold tracking-[0.18em] uppercase 
+                        text-indigo-600 dark:text-indigo-300">
             ANALYSIS OVERVIEW
           </p>
 
-          <h2
-            className="mt-1 text-3xl sm:text-4xl font-extrabold
-                         text-slate-900 dark:text-white"
-          >
+          {/* Strong heading */}
+          <h2 className="mt-1 text-3xl sm:text-4xl font-extrabold
+                         text-slate-900 dark:text-white">
             {ticker}{" "}
             <a
               href={`https://finance.yahoo.com/quote/${ticker}`}
@@ -129,6 +102,7 @@ export default function Results() {
             </a>
           </h2>
 
+          {/* Strong subheading */}
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Range: {range} • Interval: {interval}
           </p>

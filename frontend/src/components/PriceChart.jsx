@@ -17,7 +17,7 @@ export default function PriceChart({ data, showBB = true }) {
     window.matchMedia &&
     window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-  const axisColor = isDark ? "#e5e7eb" : "#475569";
+  const axisColor = isDark ? "#e5e7eb" : "#475569"; // brighter in dark
   const gridColor = isDark ? "rgba(148,163,184,0.5)" : "rgba(148,163,184,0.35)";
 
   return (
@@ -80,7 +80,6 @@ export default function PriceChart({ data, showBB = true }) {
               stroke="#4f46e5"
               strokeWidth={2}
               dot={false}
-              connectNulls={true}
             />
 
             {/* BOLLINGER BANDS */}
@@ -93,7 +92,6 @@ export default function PriceChart({ data, showBB = true }) {
                   stroke="#94a3b8"
                   strokeDasharray="4 4"
                   dot={false}
-                  connectNulls={true}
                 />
                 <Line
                   type="monotone"
@@ -102,7 +100,6 @@ export default function PriceChart({ data, showBB = true }) {
                   stroke="#94a3b8"
                   strokeDasharray="4 4"
                   dot={false}
-                  connectNulls={true}
                 />
               </>
             )}
