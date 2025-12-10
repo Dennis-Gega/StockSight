@@ -13,23 +13,55 @@ std::vector<PriceBar> DB::fetch_prices(
     int limit)
 {
     try {
-        std::cout << "[DB::fetch_prices] SQL query starting..." << std::endl;
-        std::cout << "  Ticker=" << ticker << " Limit=" << limit << std::endl;
+        std::cout << "\n[DB::fetch_prices] Start\n";
+        std::cout << "  ticker="   << ticker    << "\n";
+        std::cout << "  interval=" << interval  << "\n";
+        std::cout << "  start_in =" << start_iso << "\n";
+        std::cout << "  end_in   =" << end_iso   << "\n";
+        std::cout << "  limit="    << limit     << "\n";
 
         pqxx::connection c(conn_);
         pqxx::work tx(c);
 
-        // Correct query — simple fetch by symbol
+        std::string start_final = start_iso.empty()
+            ? "now() - interval '3 months'"
+            : start_iso;
+
+        std::string end_final = end_iso.empty()
+            ? "now()"
+            : end_iso;
+
+        std::cout << "  start_final=" << start_final << "\n";
+        std::cout << "  end_final="   << end_final   << "\n";
+
+        std::string bucket = "1 day";
+
+        if (interval == "1wk" || interval == "1w")
+            bucket = "7 days";
+        else if (interval == "1d")
+            bucket = "1 day";
+
+        std::cout << "  bucket=" << bucket << "\n";
+
         std::string sql = R"SQL(
-            SELECT "Ticker" AS symbol, "Date" AS time, "Open" AS open, "High" AS high, "Low" AS low, "Close" AS close, "Volume" AS volume
+            SELECT 
+                "Ticker" AS symbol,
+                time_bucket($2, "Date") AS bucket_time,
+                FIRST("Open", "Date")  AS open,
+                MAX("High")            AS high,
+                MIN("Low")             AS low,
+                LAST("Close", "Date")  AS close,
+                SUM("Volume")          AS volume
             FROM public.sp500_data
             WHERE "Ticker" = $1
-            ORDER BY "Date" ASC
-            LIMIT $2
+              AND "Date"::date >= ()SQL" + start_final + R"SQL()::date
+              AND "Date"::date <= ()SQL" + end_final   + R"SQL()::date
+            GROUP BY symbol, bucket_time
+            ORDER BY bucket_time ASC
+            LIMIT $3
         )SQL";
 
-
-        auto r = tx.exec_params(sql, ticker, limit);
+        auto r = tx.exec_params(sql, ticker, bucket, limit);
         tx.commit();
 
         std::vector<PriceBar> out;
@@ -39,17 +71,10 @@ std::vector<PriceBar> DB::fetch_prices(
             PriceBar p;
             p.ticker = row["symbol"].as<std::string>();
 
-            // *** FIX TIMESTAMP FORMAT FOR REACT ***
-            std::string raw = row["time"].as<std::string>();
-
-            // Convert "2025-10-23 15:32:17.081769+00"
-            // → "2025-10-23T15:32:17.081769Z"
-            for (char &c : raw) {
+            std::string raw = row["bucket_time"].as<std::string>();
+            for (char &c : raw)
                 if (c == ' ') c = 'T';
-            }
-            if (raw.back() != 'Z')
-                raw.push_back('Z');
-
+            if (!raw.empty() && raw.back() != 'Z') raw.push_back('Z');
             p.ts = raw;
 
             p.open   = row["open"].as<double>();
@@ -61,11 +86,11 @@ std::vector<PriceBar> DB::fetch_prices(
             out.push_back(p);
         }
 
-        std::cout << "[DB::fetch_prices] Completed, rows=" << out.size() << std::endl;
+        std::cout << "[DB::fetch_prices] Rows returned = " << out.size() << "\n";
         return out;
     }
     catch (const std::exception& e) {
         std::cerr << "[DB ERROR] " << e.what() << std::endl;
-        throw;  // rethrow to /api/prices
+        throw;
     }
 }

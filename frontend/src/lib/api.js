@@ -1,6 +1,6 @@
 // src/lib/api.js
 
-const API_ROOT = "/api"; 
+const API_ROOT = "/api";
 
 function buildParams(params = {}) {
   const search = new URLSearchParams();
@@ -21,36 +21,42 @@ async function parseError(res) {
   }
 }
 
+// -----------------------------
+// INDICATORS
+// -----------------------------
 export async function fetchIndicators({ ticker, range, interval }) {
   const qs = buildParams({
     ticker: ticker?.toUpperCase(),
     range,
     interval,
+    limit: 500,
   });
 
   const res = await fetch(`${API_ROOT}/indicators?${qs}`);
 
-  // 🎯 soft error handling so TickerForm can decide to show message
   if (!res.ok) {
     const err = await parseError(res);
     return {
       ok: false,
-      error: err || `Failed with status ${res.status}`
+      error: err || `Failed with status ${res.status}`,
     };
   }
 
   return {
     ok: true,
-    data: await res.json()
+    data: await res.json(),
   };
 }
 
+// -----------------------------
+// PRICES
+// -----------------------------
 export async function fetchPrices({ ticker, range, interval, limit }) {
   const qs = buildParams({
     ticker: ticker?.toUpperCase(),
     range,
     interval,
-    limit,
+    limit: limit || 500,
   });
 
   const res = await fetch(`${API_ROOT}/prices?${qs}`);
@@ -59,12 +65,12 @@ export async function fetchPrices({ ticker, range, interval, limit }) {
     const err = await parseError(res);
     return {
       ok: false,
-      error: err || `Failed with status ${res.status}`
+      error: err || `Failed with status ${res.status}`,
     };
   }
 
   return {
     ok: true,
-    data: await res.json()
+    data: await res.json(),
   };
 }

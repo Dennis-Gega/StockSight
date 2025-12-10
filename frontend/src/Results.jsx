@@ -18,7 +18,7 @@ export default function Results() {
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
-  const [toggles, setToggles] = useState({ rsi: true, macd: true, bb: true });
+  const [toggles, setToggles] = useState({ bb: true });
 
   useEffect(() => {
     let cancelled = false;
@@ -27,14 +27,23 @@ export default function Results() {
       setLoading(true);
       try {
         const res = await fetchIndicators({ ticker, range, interval });
-        if (!cancelled) setData(res);
+
+        if (!cancelled) {
+          if (!res.ok) {
+            const qs = new URLSearchParams({
+              error: res.error || `No data returned for ${ticker}`
+            }).toString();
+            navigate(`/?${qs}`, { replace: true });
+            return;
+          }
+
+          setData(res);
+        }
       } catch (e) {
         if (!cancelled) {
-          const msg =
-            e?.message && e.message !== "Failed to load indicator data"
-              ? e.message
-              : `Could not load data for ticker “${ticker}”.`;
-          const qs = new URLSearchParams({ error: msg }).toString();
+          const qs = new URLSearchParams({
+            error: `No data returned for ${ticker}`
+          }).toString();
           navigate(`/?${qs}`, { replace: true });
         }
       } finally {
@@ -57,22 +66,31 @@ export default function Results() {
 
   const chartData = useMemo(() => {
     if (!prices.length) return [];
-    return prices.map((p, i) => ({
+
+    const rows = prices.map((p, i) => ({
       time: new Date(p.t).getTime(),
       close: p.c ?? null,
       bb_upper: indicators?.bb?.upper?.[i] ?? null,
       bb_lower: indicators?.bb?.lower?.[i] ?? null,
     }));
-  }, [prices, indicators]);
+
+    const cutoffDate = new Date(rows[rows.length - 1].time);
+
+    if (range === "1mo") cutoffDate.setMonth(cutoffDate.getMonth() - 1);
+    else if (range === "3mo") cutoffDate.setMonth(cutoffDate.getMonth() - 3);
+    else if (range === "6mo") cutoffDate.setMonth(cutoffDate.getMonth() - 6);
+    else if (range === "1y") cutoffDate.setFullYear(cutoffDate.getFullYear() - 1);
+    else cutoffDate.setMonth(cutoffDate.getMonth() - 3);
+
+    const cutoff = cutoffDate.getTime();
+    return rows.filter((r) => r.time >= cutoff);
+  }, [prices, indicators, range]);
 
   if (loading) return <Loader />;
   if (!inner) return <ErrorMessage>No data returned for {ticker}.</ErrorMessage>;
 
   return (
-    <section className="mx-auto max-w-6xl py-8 space-y-6
-                        text-slate-900 dark:text-slate-100">
-
-      {/* Back button */}
+    <section className="mx-auto max-w-6xl py-8 space-y-6 text-slate-900 dark:text-slate-100">
       <button
         onClick={() => navigate("/")}
         className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
@@ -82,15 +100,11 @@ export default function Results() {
 
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          {/* Strong label */}
-          <p className="text-xs font-semibold tracking-[0.18em] uppercase 
-                        text-indigo-600 dark:text-indigo-300">
+          <p className="text-xs font-semibold tracking-[0.18em] uppercase text-indigo-600 dark:text-indigo-300">
             ANALYSIS OVERVIEW
           </p>
 
-          {/* Strong heading */}
-          <h2 className="mt-1 text-3xl sm:text-4xl font-extrabold
-                         text-slate-900 dark:text-white">
+          <h2 className="mt-1 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
             {ticker}{" "}
             <a
               href={`https://finance.yahoo.com/quote/${ticker}`}
@@ -102,7 +116,6 @@ export default function Results() {
             </a>
           </h2>
 
-          {/* Strong subheading */}
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Range: {range} • Interval: {interval}
           </p>
