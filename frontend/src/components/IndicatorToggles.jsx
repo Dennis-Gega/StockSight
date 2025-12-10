@@ -6,7 +6,7 @@ const inactive =
   "bg-white/80 dark:bg-slate-900/70 text-slate-600 dark:text-slate-200 border-slate-300 dark:border-slate-700";
 
 export default function IndicatorToggles({ state, onChange }) {
-  const { bb } = state; // removed rsi & macd from destructuring
+  const { rsi, macd, bb } = state;
 
   function toggle(key) {
     onChange({ ...state, [key]: !state[key] });
@@ -17,7 +17,20 @@ export default function IndicatorToggles({ state, onChange }) {
       <span className="text-xs uppercase tracking-[0.16em] text-slate-500 mr-1">
         Indicators
       </span>
-
+      <button
+        type="button"
+        onClick={() => toggle("rsi")}
+        className={`${base} ${rsi ? active : inactive}`}
+      >
+        RSI
+      </button>
+      <button
+        type="button"
+        onClick={() => toggle("macd")}
+        className={`${base} ${macd ? active : inactive}`}
+      >
+        MACD
+      </button>
       <button
         type="button"
         onClick={() => toggle("bb")}
