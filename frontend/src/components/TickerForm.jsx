@@ -21,12 +21,10 @@ export default function TickerForm({ onError }) {
       });
 
       if (!res?.data) {
-        // invalid ticker: stay on home
         onError && onError(`No data returned for ${tickerInput.toUpperCase()}`);
         return;
       }
 
-      // valid ticker: clear error and navigate
       onError && onError("");
       navigate(
         `/results?ticker=${tickerInput.toUpperCase()}&range=${range}&interval=${interval}`
@@ -43,19 +41,42 @@ export default function TickerForm({ onError }) {
         value={tickerInput}
         onChange={(e) => setTickerInput(e.target.value)}
         placeholder="Enter ticker symbol"
-        className="rounded border px-3 py-2 w-full"
+        className="rounded border px-3 py-2 w-full 
+                   bg-white dark:bg-slate-900 
+                   text-slate-900 dark:text-slate-200 
+                   border-slate-300 dark:border-slate-700"
       />
+
       <div className="flex gap-2">
-        <select value={range} onChange={(e) => setRange(e.target.value)} className="rounded border px-2 py-1">
+        <select
+          value={range}
+          onChange={(e) => setRange(e.target.value)}
+          className="rounded border px-2 py-1 
+                     bg-white dark:bg-slate-800 
+                     text-slate-900 dark:text-slate-200 
+                     border-slate-300 dark:border-slate-700"
+        >
           <option value="1mo">1 month</option>
           <option value="3mo">3 months</option>
           <option value="6mo">6 months</option>
+          <option value="1y">1 year</option>
         </select>
-        <select value={interval} onChange={(e) => setInterval(e.target.value)} className="rounded border px-2 py-1">
+
+        <select
+          value={interval}
+          onChange={(e) => setInterval(e.target.value)}
+          className="rounded border px-2 py-1
+                     bg-white dark:bg-slate-800
+                     text-slate-900 dark:text-slate-200
+                     border-slate-300 dark:border-slate-700"
+        >
           <option value="1d">1 day</option>
-          <option value="1wk">1 week</option>
         </select>
-        <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+
+        <button
+          type="submit"
+          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        >
           Analyze
         </button>
       </div>
