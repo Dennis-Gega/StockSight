@@ -1,28 +1,29 @@
-# Use a slim Debian image with build tools
+# Base Debian system
 FROM debian:stable-slim
 
-# Install necessary packages
+# Install tools + PostgreSQL libs
 RUN apt-get update && \
-    apt-get install -y g++ cmake libpq-dev && \
+    apt-get install -y g++ cmake make pkg-config \
+    libpq-dev libpqxx-dev && \
     apt-get clean
 
-# Set working directory
+# Set working directory inside container
 WORKDIR /app
 
-# Copy backend folder contents into container
+# Copy backend folder content into container
 COPY . .
 
-# Build the project just like you do locally
+# Build using CMake (same as you do locally)
 RUN mkdir -p build && \
     cd build && \
     cmake .. && \
     make -j4
 
-# Render sets the PORT automatically
+# Render exposes PORT automatically
 ENV PORT=8080
 
 # Expose port
 EXPOSE 8080
 
-# Start your backend binary
+# Start backend
 CMD ["/app/build/stocksight-backend"]
