@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { fetchIndicators } from "./lib/api.js";
+import {
+  getFavorites,
+  addFavorite,
+  removeFavorite
+} from "./lib/favorites.js";
 
 import Loader from "./components/Loader.jsx";
 import ErrorMessage from "./components/ErrorMessage.jsx";
@@ -19,6 +24,13 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [toggles, setToggles] = useState({ bb: true });
+
+  const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
+    const list = getFavorites();
+    setFavorites(list);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,7 +83,7 @@ export default function Results() {
       time: new Date(p.t).getTime(),
       close: p.c ?? null,
       bb_upper: indicators?.bb?.upper?.[i] ?? null,
-      bb_lower: indicators?.bb?.lower?.[i] ?? null,
+      bb_lower: indicators?.bb?.lower?.[i] ?? null
     }));
 
     const cutoffDate = new Date(rows[rows.length - 1].time);
@@ -79,15 +91,29 @@ export default function Results() {
     if (range === "1mo") cutoffDate.setMonth(cutoffDate.getMonth() - 1);
     else if (range === "3mo") cutoffDate.setMonth(cutoffDate.getMonth() - 3);
     else if (range === "6mo") cutoffDate.setMonth(cutoffDate.getMonth() - 6);
-    else if (range === "1y") cutoffDate.setFullYear(cutoffDate.getFullYear() - 1);
+    else if (range === "1y")
+      cutoffDate.setFullYear(cutoffDate.getFullYear() - 1);
     else cutoffDate.setMonth(cutoffDate.getMonth() - 3);
 
     const cutoff = cutoffDate.getTime();
     return rows.filter((r) => r.time >= cutoff);
   }, [prices, indicators, range]);
 
+  const isFavorite = favorites.includes(ticker);
+
+  function handleToggleFavorite() {
+    if (isFavorite) {
+      removeFavorite(ticker);
+      setFavorites(favorites.filter((t) => t !== ticker));
+    } else {
+      addFavorite(ticker);
+      setFavorites([...favorites, ticker]);
+    }
+  }
+
   if (loading) return <Loader />;
-  if (!inner) return <ErrorMessage>No data returned for {ticker}.</ErrorMessage>;
+  if (!inner)
+    return <ErrorMessage>No data returned for {ticker}.</ErrorMessage>;
 
   return (
     <section className="mx-auto max-w-6xl py-8 space-y-6 text-slate-900 dark:text-slate-100">
@@ -119,6 +145,17 @@ export default function Results() {
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Range: {range} • Interval: {interval}
           </p>
+
+          <button
+            type="button"
+            onClick={handleToggleFavorite}
+            className="mt-3 inline-flex items-center gap-2 rounded-full border border-indigo-200 dark:border-indigo-700 px-3 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-200 bg-white/60 dark:bg-slate-900/60 hover:bg-indigo-50 dark:hover:bg-indigo-900/40"
+          >
+            <span className="text-base">
+              {isFavorite ? "★" : "☆"}
+            </span>
+            <span>{isFavorite ? "Favorited" : "Add to favorites"}</span>
+          </button>
         </div>
 
         <IndicatorToggles state={toggles} onChange={setToggles} />
@@ -128,7 +165,7 @@ export default function Results() {
         summary={{
           signal,
           rsi: latestRsi,
-          macd: latestMacd,
+          macd: latestMacd
         }}
         showTooltips={true}
       />
