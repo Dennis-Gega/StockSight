@@ -1,28 +1,49 @@
-const members = [
-  // add/change later
-  { name: "Noah Steinberg", role: "Frontend / Integration", img: "/team/noah.jpg" },
-  { name: "Member 2", role: "Backend (C++)", img: "/team/member2.jpg" },
-  { name: "Member 3", role: "Data / Indicators", img: "/team/member3.jpg" },
+// src/Team.jsx
+
+const teamMembersTop = [
+  { name: "Noah Steinberg", role: "Backend (C++)", image: "/team/noah.jpg" },
+  { name: "Dennis Gega", role: "Data & API", image: "/team/dennis.jpg" }
+];
+
+const teamMembersBottom = [
+  { name: "Parth Sachdev", role: "Data Pipeline & Daily Updates/ UX", image: "/team/parth.jpg" },
+  { name: "Aaron Ngo", role: "Frontend / Integration", image: "/team/aaron.jpg" },
+  { name: "Abraham Ruiz", role: "Frontend / Integration", image: "/team/abraham.jpg" }
 ];
 
 export default function Team() {
-  return (
-    <section className="space-y-6">
-      <h1 className="text-3xl font-extrabold">Our Team</h1>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {members.map((m) => (
-          <article key={m.name} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 shadow-soft overflow-hidden">
-            <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-800">
-              <img src={m.img} alt={m.name} className="w-full h-full object-cover" />
-            </div>
-            <div className="p-4">
-              <h3 className="font-semibold">{m.name}</h3>
-              <p className="text-sm text-slate-500">{m.role}</p>
-            </div>
-          </article>
-        ))}
+  const renderMember = (member) => (
+    <article
+      key={member.name}
+      className="overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white/80 shadow-soft"
+    >
+      <div className="relative h-64 bg-slate-80">
+        <img
+          src={member.image}
+          alt={member.name}
+          className="h-full w-full object-cover object-center"
+          loading="lazy"
+          onError={(e) => { e.currentTarget.style.display = "none"; }}
+        />
       </div>
-      <p className="text-sm text-slate-500">Put images in <code>/public/team/</code> (optional).</p>
+
+      <div className="border-t border-slate-200/70 bg-white/90 px-6 py-4">
+        <h2 className="text-lg font-semibold text-slate-900">{member.name}</h2>
+        <p className="text-sm text-slate-500">{member.role}</p>
+      </div>
+    </article>
+  );
+
+  return (
+    <section className="space-y-8 pb-16">
+      <header className="space-y-2">
+        <h1 className="text-4xl font-extrabold tracking-tight">Our Team</h1>
+      </header>
+
+      <div className="flex flex-col gap-8 items-center">
+        <div className="grid gap-8 grid-cols-2">{teamMembersTop.map(renderMember)}</div>
+        <div className="grid gap-8 grid-cols-3">{teamMembersBottom.map(renderMember)}</div>
+      </div>
     </section>
   );
 }
