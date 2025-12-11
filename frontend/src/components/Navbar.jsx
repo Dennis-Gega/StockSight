@@ -51,6 +51,14 @@ export default function Navbar() {
           >
             Team
           </NavLink>
+          <NavLink
+            to="/favorites"
+            className={({ isActive }) =>
+              `${linkBase} ${isActive ? active : ""}`
+            }
+          >
+            Favorites
+          </NavLink>
           <a
             href="https://recharts.org"
             target="_blank"
