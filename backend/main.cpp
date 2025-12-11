@@ -23,6 +23,7 @@ static std::string range_to_start_expr(const std::string& range) {
 }
 
 int main() {
+    // Load DB URL from environment
     std::string db_uri = env_or(
         "TIMESCALE_SERVICE_URL",
         "postgresql://postgres:postgres@localhost:5432/stocksight"
@@ -33,10 +34,30 @@ int main() {
     DB db(db_uri);
     httplib::Server server;
 
+    // -----------------------------------------------------
+    // CORS HEADERS (IMPORTANT FOR DEPLOYMENT)
+    // -----------------------------------------------------
+    server.set_default_headers({
+        {"Access-Control-Allow-Origin", "*"},
+        {"Access-Control-Allow-Methods", "GET, POST, OPTIONS"},
+        {"Access-Control-Allow-Headers", "Content-Type"}
+    });
+
+    // OPTIONS preflight
+    server.Options(R"(.*)", [](const httplib::Request&, httplib::Response& res) {
+        res.status = 200;
+    });
+
+    // -----------------------------------------------------
+    // HEALTH CHECK
+    // -----------------------------------------------------
     server.Get("/api/health", [&](const httplib::Request&, httplib::Response& res){
         res.set_content("{\"status\":\"ok\"}", "application/json");
     });
 
+    // -----------------------------------------------------
+    // PRICES ENDPOINT
+    // -----------------------------------------------------
     server.Get("/api/prices", [&](const httplib::Request& req, httplib::Response& res){
         try {
             std::string ticker   = req.has_param("ticker")   ? req.get_param_value("ticker")   : "AAPL";
@@ -84,6 +105,9 @@ int main() {
         }
     });
 
+    // -----------------------------------------------------
+    // INDICATORS ENDPOINT
+    // -----------------------------------------------------
     server.Get("/api/indicators", [&](const httplib::Request& req, httplib::Response& res){
         try {
             std::string ticker   = req.has_param("ticker")   ? req.get_param_value("ticker")   : "AAPL";
@@ -237,6 +261,9 @@ int main() {
         }
     });
 
-    std::cout << "Listening on http://localhost:8080\n";
+    // -----------------------------------------------------
+    // START SERVER
+    // -----------------------------------------------------
+    std::cout << "Listening on http://0.0.0.0:8080\n";
     server.listen("0.0.0.0", 8080);
 }

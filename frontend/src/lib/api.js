@@ -1,6 +1,15 @@
 // src/lib/api.js
 
-const API_ROOT = "/api";
+// -----------------------------
+// API BASE URL (auto: dev = localhost, prod = Render)
+// -----------------------------
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "http://127.0.0.1:8080"; // fallback for local dev
+
+function apiUrl(path) {
+  return `${API_BASE}${path}`;
+}
 
 function buildParams(params = {}) {
   const search = new URLSearchParams();
@@ -32,7 +41,7 @@ export async function fetchIndicators({ ticker, range, interval }) {
     limit: 500,
   });
 
-  const res = await fetch(`${API_ROOT}/indicators?${qs}`);
+  const res = await fetch(apiUrl(`/api/indicators?${qs}`));
 
   if (!res.ok) {
     const err = await parseError(res);
@@ -59,7 +68,7 @@ export async function fetchPrices({ ticker, range, interval, limit }) {
     limit: limit || 500,
   });
 
-  const res = await fetch(`${API_ROOT}/prices?${qs}`);
+  const res = await fetch(apiUrl(`/api/prices?${qs}`));
 
   if (!res.ok) {
     const err = await parseError(res);
